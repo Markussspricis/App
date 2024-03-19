@@ -5,7 +5,7 @@
         <h1>Create your account</h1>
       </div>
       <div class="div-form">
-        <form class="form" @submit.prevent="register">
+        <form class="form">
 
           <div class="name">
             <div class="input-container">
@@ -23,8 +23,7 @@
               />
               <label for="name" class="input-label" :class="{ active: isLabelActive['name'], committed: isInputCommitted['name'] }">Name</label>
             </div>
-            <span v-if="nameError" class="error-message">{{ nameError }}</span>
-            <span v-if="!name && submitted" class="error-message">Name is required</span>
+            <span v-if="nameHasSpaces" class="error-message">Name should not contain spaces.</span>
           </div>
 
           <div class="username">
@@ -43,9 +42,8 @@
               />
               <label for="username" class="input-label" :class="{ active: isLabelActive['username'], committed: isInputCommitted['username'] }">Username</label>
             </div>
-            <span v-if="serverErrors.username" class="error-message">{{ serverErrors.username }}</span>
-            <span v-else-if="usernameError" class="error-message">{{ usernameError }}</span>
-            <span v-else-if="!username && submitted" class="error-message">Username is required</span>
+            <span v-if="usernameHasSpaces" class="error-message">Username should not contain spaces.</span>
+            <span v-if="usernameError" class="error-message">{{ usernameError }}</span>
           </div>
 
           <div class="email">
@@ -64,9 +62,8 @@
               />
               <label for="email" class="input-label" :class="{ active: isLabelActive['email'], committed: isInputCommitted['email'] }">Email</label>
             </div>
-            <span v-if="serverErrors.email" class="error-message">{{ serverErrors.email }}</span>
-            <span v-else-if="emailError" class="error-message">{{ emailError }}</span>
-            <span v-else-if="!email && submitted" class="error-message">Email is required</span>
+            <span v-if="invalidEmail" class="error-message">Please enter a valid email address.</span>
+            <span v-if="emailError" class="error-message">{{ emailError }}</span>
           </div>
 
           <div class="password">
@@ -85,8 +82,7 @@
               />
               <label for="password" class="input-label" :class="{ active: isLabelActive['password'], committed: isInputCommitted['password'] }">Password</label>
             </div>
-            <span v-if="passwordError" class="error-message">{{ passwordError }}</span>
-            <span v-if="!password && submitted" class="error-message">Password is required</span>
+            <span v-if="passwordWarningVisible" class="error-message">Password must be at least 8 characters long.</span>
           </div>
 
           <div class="confirm_password">
@@ -105,8 +101,7 @@
               />
               <label for="confirmPassword" class="input-label" :class="{ active: isLabelActive['confirmPassword'], committed: isInputCommitted['confirmPassword'] }">Confirm password</label>
             </div>
-            <span v-if="confirmPasswordError" class="error-message">{{ confirmPasswordError }}</span>
-            <span v-if="!confirmPassword && submitted" class="error-message">Confirm password is required</span>
+            <span v-if="passwordsDoNotMatch" class="error-message">Passwords do not match.</span>
           </div>
 
           <div class="birth_date">
@@ -133,9 +128,8 @@
               </select>
             </div>
           </div>
-          <span v-if=dobError class="error-message-2">Date of birth is required</span>
           <div class="submit-form">
-            <button type="submit" class="next" @click="submitted = true">Create account</button>
+            <button type="submit" class="next" @click="validateForm" v-bind:disabled="!allFieldsFilled" id="next">Create account</button>
           </div>
           <router-link to="/login" class="login-link">Already have an account? Login</router-link>
         </form>
@@ -145,205 +139,179 @@
 </template>
 
 <script>
-import axios from 'axios';
-
-export default {
-  name: 'Register',
-  data() {
-    return {
-      name: '',
-      username: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      day: '',
-      month: '',
-      year: '',
-      months: [
-        'January', 'February', 'March', 'April', 'May', 'June', 
-        'July', 'August', 'September', 'October', 'November', 'December'
-      ],
-      years: Array.from({ length: 100 }, (_, index) => new Date().getFullYear() - index),
-      // showErrors: false,
-      submitted: false,
-      serverErrors: {},
-      isLabelActive: {
-        name: false,
-        username: false,
-        email: false,
-        password: false,
-        confirmPassword: false,
-      },
-        isInputCommitted: {
-        name: false,
-        username: false,
-        email: false,
-        password: false,
-        confirmPassword: false,
-      },
-    };
-  },
-  computed: {
-    nameError() {
-      return (this.name && this.name.includes(' ') && this.submitted) ? 'Name should not contain spaces' : '';
-    },
-    usernameError() {
-      return (this.serverErrors.username || (this.username && this.username.includes(' ') && this.submitted)) ? this.serverErrors.username || 'Username should not contain spaces' : '';
-    },
-    emailError() {
-      return (this.serverErrors.email || (this.email && !/^\S+@\S+\.\S+$/.test(this.email) && this.submitted)) ? this.serverErrors.email || 'Invalid email' : '';
-    },
-    passwordError() {
-      return (this.password && this.password.length < 8 && this.submitted) ? 'Password must be at least 8 characters long' : '';
-    },
-    confirmPasswordError() {
-      return (this.confirmPassword && this.password !== this.confirmPassword && this.submitted) ? 'Passwords do not match' : '';
-    },
-    dobError() {
-      return (!this.day || !this.month || !this.year) && this.submitted && !this.dob;
-    },
-    days() {
-      if (this.month === '') return [];
-      const selectedMonth = parseInt(this.month);
-      const daysInMonth = new Date(this.year, selectedMonth, 0).getDate();
-      return Array.from({ length: daysInMonth }, (_, index) => index + 1);
-    },
-    dob() {
-      if (!this.day || !this.month || !this.year) return ''; 
-      const paddedMonth = String(this.month).padStart(2, '0');
-      return `${this.year}-${paddedMonth}-${this.day.padStart(2, '0')}`;
-    },
-    hasError() {
-      return (
-        this.nameError ||
-        this.usernameError ||
-        this.emailError ||
-        this.passwordError ||
-        this.confirmPasswordError ||
-        this.dobError
-      );
-    }
-  },
-  mounted() {
-    document.addEventListener('click', this.handleClickOutside);
-    this.$refs.selectMonth.style.color = "black";
-    this.$refs.selectDay.style.color = "black";
-    this.$refs.selectYear.style.color = "black";
-  },
-  beforeDestroy() {
-    document.removeEventListener('click', this.handleClickOutside);
-  },
-  methods: {
-    async register() {
-      // Set submitted to true to trigger validation messages
-      this.submitted = true;
-
-      // Do not proceed with registration if there are any errors
-      if (this.hasError) return;
-
-      const userData = {
-        name: this.name,
-        username: this.username,
-        email: this.email,
-        password: this.password,
-        dob: this.dob 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  export default {
+    name: 'Register',
+    data() {
+      return {
+        name: '',
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        day: '',
+        month: '',
+        year: '',
+        dob: '',
+        months: [
+          'January', 'February', 'March', 'April', 'May', 'June', 
+          'July', 'August', 'September', 'October', 'November', 'December'
+        ],
+        years: Array.from({ length: 100 }, (_, index) => new Date().getFullYear() - index),
+        nameHasSpaces: false,
+        usernameHasSpaces: false,
+        invalidEmail: false,
+        passwordWarningVisible: false,
+        passwordsDoNotMatch: false,
+        isLabelActive: {
+          name: false,
+          username: false,
+          email: false,
+          password: false,
+          confirmPassword: false,
+        },
+          isInputCommitted: {
+          name: false,
+          username: false,
+          email: false,
+          password: false,
+          confirmPassword: false,
+        },
+        emailError: '',
+        usernameError: '',
+        error:null,
       };
-
-      try {
-        const response = await axios.post('/api/register', userData);
-        console.log('User registered successfully:', response.data);
-        this.$router.push('/home');
-        this.resetForm();
-      } catch (error) {
-        console.error('Registration failed:', error.response.data);
-        if (error.response && error.response.data && error.response.data.error) {
-          // Parse the error message to extract individual validation errors
-          const errorMessage = error.response.data.error;
-          const usernameErrorIndex = errorMessage.indexOf('username');
-          const emailErrorIndex = errorMessage.indexOf('email');
-
-          if (usernameErrorIndex !== -1) {
-            // Set the username error message
-            this.serverErrors.username = 'Username already exists';
-          } else {
-            // Clear the username error message
-            this.serverErrors.username = '';
-          }
-
-          if (emailErrorIndex !== -1) {
-            // Set the email error message
-            this.serverErrors.email = 'Email already exists';
-          } else {
-            // Clear the email error message
-            this.serverErrors.email = '';
-          }
-        } else {
-          // Clear the error messages if there are no server errors
-          this.serverErrors.username = '';
-          this.serverErrors.email = '';
-        }
-      }
     },
-    updateLabel(fieldName) {
-      this.isLabelActive[fieldName] = this[fieldName].length > 0;
-      this.isInputCommitted[fieldName] = false;
+    computed: {
+      days() {
+        if (this.month === '') return [];
+        const selectedMonth = parseInt(this.month);
+        const daysInMonth = new Date(this.year, selectedMonth, 0).getDate();
+        return Array.from({ length: daysInMonth }, (_, index) => index + 1);
+      },
+      allFieldsFilled() {
+        return this.name && this.username && this.email && this.password && this.confirmPassword && this.month && this.day && this.year;
+      },
     },
-    moveLabelUp(fieldName) {
-      this.isLabelActive[fieldName] = true;
-      this.isInputCommitted[fieldName] = false;
-    },
-    resetLabelPosition(fieldName) {
-      if (this[fieldName].length === 0) {
-        this.isLabelActive[fieldName] = false;
-      }
-      if (this[fieldName].length > 0) {
-        this.isInputCommitted[fieldName] = true;
-      }
-    },
-    handleClickOutside(event) {
-      const inputContainer = this.$el.querySelector('.input-container');
-      if (inputContainer && !inputContainer.contains(event.target)) {
-        this.resetLabelPosition();
-      }
-    },
-    // updateDays() {
-    //   // No need to implement this method since days are computed dynamically
-    // },
-    resetForm() {
-      this.name = '';
-      this.username = '';
-      this.email = '';
-      this.password = '';
-      this.confirmPassword = '';
-      this.day = '';
-      this.month = '';
-      this.year = '';
-      this.submitted = false; // Reset submitted after successful registration
-      this.serverErrors = {}; // Clear server errors after each submission
-    }
-  },
-  watch: {
-    username(newValue, oldValue) {
-      if (newValue !== oldValue) {
-        this.serverErrors.username = '';
-      }
-    },
-    email(newValue, oldValue) {
-      if (newValue !== oldValue) {
-        this.serverErrors.email = '';
-      }
-    },
-    month: function () {
+    mounted() {
       this.$refs.selectMonth.style.color = "black";
-    },
-    day: function () {
       this.$refs.selectDay.style.color = "black";
-    },
-    year: function () {
       this.$refs.selectYear.style.color = "black";
     },
+    methods: {
+      validateForm(e) {
+        e.preventDefault()
+        this.nameHasSpaces = false;
+        this.usernameHasSpaces = false;
+        this.invalidEmail = false;
+        this.passwordsDoNotMatch = false;
+
+        if (this.name.includes(' ')) {
+          this.nameHasSpaces = true;
+          setTimeout(() => { this.nameHasSpaces = false; }, 3000);
+          return;
+        }
+
+        if (this.username.includes(' ')) {
+          this.usernameHasSpaces = true;
+          setTimeout(() => { this.usernameHasSpaces = false; }, 3000);
+          return;
+        }
+
+        if (!emailRegex.test(this.email)) {
+          this.invalidEmail = true;
+          setTimeout(() => { this.invalidEmail = false; }, 3000);
+          return;
+        }
+
+        if (this.password.length < 8) {
+          this.passwordWarningVisible = true;
+          setTimeout(() => {
+            this.passwordWarningVisible = false;
+          }, 3000);
+          return;
+        }
+
+        if (this.password !== this.confirmPassword) {
+          this.passwordsDoNotMatch = true;
+          setTimeout(() => { this.passwordsDoNotMatch = false; }, 3000);
+          return;
+        }
+        if (!this.nameHasSpaces && !this.usernameHasSpaces && !this.invalidEmail && !this.passwordsDoNotMatch) {
+          this.register();
+        }
+      },
+      monthNameToNumber(monthName) {
+        const months = [
+          "January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December"
+        ];
+        const monthNumber = months.findIndex(month => month === monthName) + 1;
+        return monthNumber.toString().padStart(2, '0');
+      },
+      async register() {
+        this.emailError = '';
+        this.usernameError = '';
+
+        try {
+          const registrationData = {
+            Name: this.name,
+            UserTag: this.username,
+            Email: this.email,
+            Password: this.password,
+            DOB: `${this.year}-${this.monthNameToNumber(this.month)}-${this.day}`,
+          };
+          const response = await this.$store.dispatch('register', registrationData);
+
+          if (response.success) {
+            this.$router.push('/home');
+          } else {
+            if (response.message.includes('Email')) {
+              this.emailError = response.message;
+              setTimeout(() => {
+                this.emailError = '';
+              }, 3000);
+            }
+            if (response.message.includes('Username')) {
+              this.usernameError = response.message;
+              setTimeout(() => {
+                this.usernameError = '';
+              }, 3000);
+            }
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      },
+      updateLabel(fieldName) {
+        this.isLabelActive[fieldName] = this[fieldName].length > 0;
+        this.isInputCommitted[fieldName] = false;
+      },
+      moveLabelUp(fieldName) {
+        this.isLabelActive[fieldName] = true;
+        this.isInputCommitted[fieldName] = false;
+      },
+      resetLabelPosition(fieldName) {
+        if (this[fieldName].length === 0) {
+          this.isLabelActive[fieldName] = false;
+        }
+        if (this[fieldName].length > 0) {
+          this.isInputCommitted[fieldName] = true;
+        }
+      },
+    },
+    watch: {
+      month: function () {
+        this.$refs.selectMonth.style.color = "black";
+      },
+      day: function () {
+        this.$refs.selectDay.style.color = "black";
+      },
+      year: function () {
+        this.$refs.selectYear.style.color = "black";
+      },
+    }
   }
-}
 </script>
 
 <style lang="scss" scoped>
@@ -569,7 +537,11 @@ export default {
               cursor: pointer;
               color: white;
             }
-            .next:hover {
+            .next:disabled{
+              color: gray;
+              background-color: #0e537e;
+            }
+            .next:not(:disabled):hover {
               background-color: #2394db;
             }
           }

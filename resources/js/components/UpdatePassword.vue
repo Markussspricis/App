@@ -5,7 +5,7 @@
         <h1>Reset password</h1>
       </div>
       <div class="div-form">
-        <form class="form" @submit.prevent="updatePassword">
+        <form class="form">
 
           <div class="email">
             <div class="input-container">
@@ -20,11 +20,11 @@
                 @input="updateLabel('email')"
                 @focus="moveLabelUp('email')"
                 @blur="resetLabelPosition('email')"
+                :class="{ 'invalid-email': !isEmailValid.value }"
               />
               <label for="email" class="input-label" :class="{ active: isLabelActive['email'], committed: isInputCommitted['email'] }">Email</label>
             </div>
-            <span v-if="submitted && !email" class="error-message">Email is required</span>
-            <span v-if="emailError && submitted" class="error-message">{{ emailError }}</span>
+            <span v-if ="emailError" class="error-message">{{ emailError }}</span>
           </div>
 
           <div class="password">
@@ -43,8 +43,7 @@
               />
               <label for="newPassword" class="input-label" :class="{ active: isLabelActive['newPassword'], committed: isInputCommitted['newPassword'] }">New password</label>
             </div>
-            <span v-if="!newPassword && submitted" class="error-message">New password is required</span>
-            <span v-if="newPasswordError && submitted" class="error-message">{{ newPasswordError }}</span>
+            <span v-if="newPasswordError" class="error-message">Password must be at least 8 characters long.</span>
           </div>
 
           <div class="confirm_password">
@@ -63,12 +62,11 @@
               />
               <label for="confirmPassword" class="input-label" :class="{ active: isLabelActive['confirmPassword'], committed: isInputCommitted['confirmPassword'] }">Confirm password</label>
             </div>
-            <span v-if="!confirmPassword && submitted" class="error-message">Confirm password is required</span>
-            <span v-if="confirmPasswordError && submitted" class="error-message">{{ confirmPasswordError }}</span>
+            <span v-if="passwordMismatch" class="error-message">Passwords do not match.</span>
           </div>
 
           <div class="submit-form">
-            <button type="submit" class="next">Reset password</button>
+            <button type="submit" class="next" @click="validateEmail(); resetPassword()" :disabled="isButtonDisabled">Reset password</button>
           </div>
 
         </form>
@@ -78,118 +76,142 @@
 </template>
 
 <script>
-import axios from 'axios';
+  import axios from 'axios';
+  import { useRouter } from 'vue-router';
+  import { ref } from 'vue';
 
-export default {
-  name: 'UpdatePassword',
-  data() {
-    return {
-      email: '',
-      newPassword: '',
-      confirmPassword: '',
-      submitted: false,
-      serverErrors: {},
-      isLabelActive: {
-        email: false,
-        newPassword: false,
-        confirmPassword: false,
+  export default {
+    name: 'UpdatePassword',
+    data() {
+      return {
+        isLabelActive: {
+          email: false,
+          newPassword: false,
+          confirmPassword: false,
+        },
+        isInputCommitted: {
+          email: false,
+          newPassword: false,
+          confirmPassword: false,
+        },
+      };
+    },
+    computed: {
+      isButtonDisabled() {
+        return !(this.email.length > 0 && this.newPassword.length > 0 && this.confirmPassword.length > 0);
       },
-      isInputCommitted: {
-        email: false,
-        newPassword: false,
-        confirmPassword: false,
-      },
-    };
-  },
-  computed: {
-    hasError() {
-      return this.emailError || this.newPasswordError || this.confirmPasswordError;
     },
-    emailError() {
-      if (this.submitted && !this.email) return 'Email is required';
-      if (this.email && !this.validEmailFormat(this.email)) return 'Invalid email';
-      return this.serverErrors.email || '';
-    },
-    newPasswordError() {
-      if (this.submitted && !this.newPassword) return 'New password is required';
-      if (this.newPassword && this.newPassword.length < 8) return 'New password must be at least 8 characters long';
-      return this.serverErrors.new_password || '';
-    },
-    confirmPasswordError() {
-      if (this.submitted && !this.confirmPassword) return 'Confirm password is required';
-      if (this.newPassword !== this.confirmPassword) return 'Passwords do not match';
-      return '';
-    }
-  },
-  methods: {
-    updatePassword() {
-      this.submitted = true;
-      if (this.hasError) return;
+    setup () {
+      const router = useRouter();
+      const emailError = ref(null);
+      const email = ref('');
+      const newPassword = ref('');
+      const confirmPassword = ref('');
+      const isEmailValid = ref(true);
+      const newPasswordError = ref(false);
+      const passwordMismatch = ref(false);
 
-      const passwordData = {
-        email: this.email,
-        new_password: this.newPassword,
-        new_password_confirmation: this.confirmPassword
+      const validateEmail = async () => {
+        email.value = email.value.toLowerCase();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        isEmailValid.value = emailRegex.test(email.value);
+
+        if (isEmailValid.value) {
+          try {
+            const response = await axios.post('/api/check-email', {
+              Email: email.value,
+            });
+
+            const data = response.data;
+
+            if (data.success) {
+              emailError.value = null;
+
+            } else {
+              emailError.value = 'Email is not registered.';
+              setTimeout(() => { emailError.value = null; }, 3000);
+            }
+          } catch (error) {
+            emailError.value = null;
+          }
+        } else{
+          emailError.value = 'Please enter a valid email.';
+          setTimeout(() => { emailError.value = null; }, 3000);
+        }
       };
 
-      axios.post('/api/update-password', passwordData)
-        .then(response => {
-          console.log('Password updated successfully:', response.data);
-          this.$router.push('/login');
-          this.resetForm();
-        })
-        .catch(error => {
-          console.error('Password update failed:', error.response.data);
-          if (error.response && error.response.data) {
-            const responseData = error.response.data;
-            if (responseData.message && responseData.message.includes('Email is not registered')) {
-              // Set the server error for email not registered
-              this.serverErrors.email = this.submitted ? 'Email is not registered': '';
-            } else {
-              // Handle other errors
-              if (responseData.errors) {
-                this.serverErrors = responseData.errors;
+      const resetPassword = async () => {
+        console.log('Resetting password...');
+        if (newPassword.value.length >= 8) {
+          newPasswordError.value = false;
+
+          if (newPassword.value === confirmPassword.value) {
+            passwordMismatch.value = false;
+
+            try {
+              const response = await axios.post('/api/reset-password', {
+                email: email.value,
+                newPassword: newPassword.value,
+              });
+
+              console.log('Response:', response.data);
+
+              const data = response.data;
+
+              if (data.success || response.data.message === 'Password reset successful') {
+                console.log('Password reset successful');
+                router.push('/login');
+              } else {
+                console.log('Password reset failed');
               }
+            } catch (error) {
+              console.error(error);
             }
+          } else {
+            passwordMismatch.value = true;
+            setTimeout(() => {
+              passwordMismatch.value = false;
+            }, 3000);
           }
-        });
-    },
-    validEmailFormat(email) {
-      const emailPattern = /^\S+@\S+\.\S+$/;
-      return emailPattern.test(email);
-    },
-    updateLabel(fieldName) {
-      this.isLabelActive[fieldName] = this[fieldName].length > 0;
-      this.isInputCommitted[fieldName] = false;
-    },
-    moveLabelUp(fieldName) {
-      this.isLabelActive[fieldName] = true;
-      this.isInputCommitted[fieldName] = false;
-    },
-    resetLabelPosition(fieldName) {
-      if (this[fieldName].length === 0) {
-        this.isLabelActive[fieldName] = false;
-      }
-      if (this[fieldName].length > 0) {
-        this.isInputCommitted[fieldName] = true;
+        } else {
+          newPasswordError.value = true;
+          setTimeout(() => {
+            newPasswordError.value = false;
+          }, 3000);
+        }
+      };
+
+      return {
+        email,
+        newPassword,
+        confirmPassword,
+        isEmailValid,
+        validateEmail,
+        resetPassword,
+        emailError,
+        newPasswordError,
+        passwordMismatch,
       }
     },
-    resetForm() {
-      this.email = '';
-      this.newPassword = '';
-      this.confirmPassword = '';
-      this.submitted = false;
-      this.serverErrors = {};
-    }
-  },
-  watch: {
-    email(newValue, oldValue) {
-      if (newValue !== oldValue) {
-        this.serverErrors.email = '';
-      }
+    methods: {
+      updateLabel(fieldName) {
+        this.isLabelActive[fieldName] = this[fieldName].length > 0;
+        this.isInputCommitted[fieldName] = false;
+      },
+      moveLabelUp(fieldName) {
+        this.isLabelActive[fieldName] = true;
+        this.isInputCommitted[fieldName] = false;
+      },
+      resetLabelPosition(fieldName) {
+        if (this[fieldName].length === 0) {
+          this.isLabelActive[fieldName] = false;
+        }
+        if (this[fieldName].length > 0) {
+          this.isInputCommitted[fieldName] = true;
+        }
+      },
     },
-  },
-}
+  }
 </script>
 
 <style lang="scss" scoped>
@@ -303,7 +325,11 @@ export default {
               cursor: pointer;
               color: white;
             }
-            .next:hover {
+            .next:disabled{
+              color: gray;
+              background-color: #0e537e;
+            }
+            .next:not(:disabled):hover {
               background-color: #2394db;
             }
           }

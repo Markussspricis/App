@@ -311,57 +311,57 @@ export default{
             this.tweetImagenav = null;
             this.previewImagenav = null;
         },
-        async createTweetnav() {
-            if (this.buttonDisabled) {
-                return;
-            }
-            const formData = new FormData();
-            formData.append('tweetText', this.tweet_text_inputnav);
-            if (this.tweetImagenav) {
-                formData.append('tweetImage', this.tweetImagenav);
-            }
-            try {
-                this.buttonDisabled = true;
+        // async createTweetnav() {
+        //     if (this.buttonDisabled) {
+        //         return;
+        //     }
+        //     const formData = new FormData();
+        //     formData.append('tweetText', this.tweet_text_inputnav);
+        //     if (this.tweetImagenav) {
+        //         formData.append('tweetImage', this.tweetImagenav);
+        //     }
+        //     try {
+        //         this.buttonDisabled = true;
 
-                const response = await this.$axios.post('/api/tweets', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                });
-                this.tweet_text_inputnav = '';
-                this.tweetImagenav = null;
-                this.previewImagenav = null;
-                this.popupTriggers.TweetTrigger = false;
-                const textarea = this.tweetInputnav;
-                textarea.style.height = 'auto';
-                setTimeout(() => {
-                    this.buttonDisabled = false;
-                }, 2000);
-            } catch (error) {
-                console.error(error);
-                this.buttonDisabled = false;
-            }
-        },
-        getAllUsersMention() {
-        axios
-            .get('/api/all-users-mention')
-            .then(response => {
-                this.users = response.data;
-            })
-            .catch(error => {
-                console.error(error);
-            });
-        },
-        getUnreadNotificationCount(){
-        axios
-            .get('/api/get-unread-notification-count')
-            .then(response => {
-                this.unreadNotificationsCount = response.data.unreadCount;
-            })
-            .catch(error => {
-                console.error(error);
-            })
-        }
+        //         const response = await this.$axios.post('/api/tweets', formData, {
+        //             headers: {
+        //                 'Content-Type': 'multipart/form-data',
+        //             },
+        //         });
+        //         this.tweet_text_inputnav = '';
+        //         this.tweetImagenav = null;
+        //         this.previewImagenav = null;
+        //         this.popupTriggers.TweetTrigger = false;
+        //         const textarea = this.tweetInputnav;
+        //         textarea.style.height = 'auto';
+        //         setTimeout(() => {
+        //             this.buttonDisabled = false;
+        //         }, 2000);
+        //     } catch (error) {
+        //         console.error(error);
+        //         this.buttonDisabled = false;
+        //     }
+        // },
+        // getAllUsersMention() {
+        // axios
+        //     .get('/api/all-users-mention')
+        //     .then(response => {
+        //         this.users = response.data;
+        //     })
+        //     .catch(error => {
+        //         console.error(error);
+        //     });
+        // },
+        // getUnreadNotificationCount(){
+        // axios
+        //     .get('/api/get-unread-notification-count')
+        //     .then(response => {
+        //         this.unreadNotificationsCount = response.data.unreadCount;
+        //     })
+        //     .catch(error => {
+        //         console.error(error);
+        //     })
+        // }
     },
         
     async mounted() {

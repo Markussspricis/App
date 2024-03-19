@@ -1,6 +1,6 @@
 <template>
   <div class="app">
-    <div class="navbar" v-if="showNavBar">
+    <div class="navbar" v-if="this.$route.name != 'Index' && this.$route.name != 'Register' && this.$route.name != 'Login' && this.$route.name != 'UpdatePassword'">
       <NavBar />
     </div>
     <div class="content">
@@ -8,24 +8,35 @@
     </div>
   </div>
 </template>
+
 <script>
-import NavBar from './Nav-bar.vue';
-export default {
-  name: 'App',
-  components: {
-    NavBar,
-  },
-  computed: {
-    // Compute whether to show the navigation bar based on the current route
-    showNavBar() {
-      // List of route names where the navigation bar should be hidden
-      const hiddenRoutes = ['Index', 'Login', 'Register', 'UpdatePassword'];
-      // Check if the current route name is in the hiddenRoutes list
-      return !hiddenRoutes.includes(this.$route.name);
+  import NavBar from './Nav-bar.vue';
+  export default {
+    name: 'App',
+    components: {
+      NavBar,
     },
-  },
-};
+    methods: {
+      logout(e){
+        e.preventDefault()
+        this.$axios.get('/sanctum/csrf-cookie').then(response => {
+          this.$axios.post('/api/logout')
+          .then(response => {
+            if (response.data.success){
+              window.location.href = '/'
+            } else {
+              console.log(response);
+            }
+          })
+          .catch(function (error){
+            console.log(error);
+          })
+        })
+      }
+    },
+  };
 </script>
+
 <style lang="scss" scoped>
   .app {
     font-family: Arial, sans-serif;

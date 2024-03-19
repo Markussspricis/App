@@ -1,30 +1,127 @@
+// import { createStore } from 'vuex';
+
+// const store = createStore({
+//   state() {
+//     return {
+//       auth: {
+//         isAuthenticated: false,
+//       },
+//     };
+//   },
+//   mutations: {
+//     login(state) {
+//       state.auth.isAuthenticated = true;
+//     },
+//     logout(state) {
+//       state.auth.isAuthenticated = false;
+//     },
+//   },
+//   actions: {
+//     initializeApp(context) {
+//         // You can perform any initialization logic here
+//         console.log('App initialization logic goes here');
+//     },
+//   },
+//   getters: {
+//     isAuthenticated(state) {
+//       return state.auth.isAuthenticated;
+//     },
+//   },
+// });
+
+// export default store;
+//store.js
 import { createStore } from 'vuex';
+import axios from 'axios';
+
+const TOKEN_KEY = 'user_token';
 
 const store = createStore({
-  state() {
-    return {
-      auth: {
-        isAuthenticated: false,
-      },
-    };
+  state: {
+    user: null,
+    isLoggedIn: false,
   },
   mutations: {
-    login(state) {
-      state.auth.isAuthenticated = true;
+    setUser(state, user) {
+      state.user = user;
+      state.isLoggedIn = !!user;
     },
-    logout(state) {
-      state.auth.isAuthenticated = false;
-    },
-  },
-  actions: {
-    initializeApp(context) {
-        // You can perform any initialization logic here
-        console.log('App initialization logic goes here');
+    removeToken(state) {
+      localStorage.removeItem(TOKEN_KEY);
+      delete axios.defaults.headers.common['Authorization'];
     },
   },
   getters: {
-    isAuthenticated(state) {
-      return state.auth.isAuthenticated;
+    user: (state) => {
+        return state.user;
+    },
+},
+  actions: {
+    initializeApp({ commit }) {
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (token) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+        axios
+          .get('/api/user')
+          .then((response) => {
+            commit('setUser', response.data);
+          })
+          .catch(() => {
+            localStorage.removeItem(TOKEN_KEY);
+          });
+      }
+    },
+    async register({ commit }, { Name, UserTag, Email, Password, DOB }) {
+      console.log('Register action called');
+      try {
+        const response = await axios.post('/api/register', {
+          Name,
+          UserTag,
+          Email,
+          Password,
+          DOB,
+        });
+        if (response.data.success) {
+          commit('setUser', response.data.user);
+          localStorage.setItem(TOKEN_KEY, response.data.user.token);
+          return response.data;
+        } else {
+          return response.data;
+        }
+      } catch(error) {
+        console.error(error);
+        throw error;
+      }
+    },
+    async login({ commit }, { Email, Password }) {
+      console.log('Login action called');
+      try {
+        const response = await axios.post('/api/login', {
+          Email,
+          Password,
+        });
+  
+        if (response.data.success) {
+          commit('setUser', response.data.user);
+          localStorage.setItem(TOKEN_KEY, response.data.user.token);
+          return response.data;
+        } else {
+          throw new Error('Invalid password...');
+        }
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    },
+
+    async logout({ commit }) {
+      const response = await axios.post('/api/logout');
+
+      if (response.data.success) {
+        commit('setUser', null);
+        commit('removeToken');
+      }
     },
   },
 });

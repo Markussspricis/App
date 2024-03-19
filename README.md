@@ -32,4 +32,3 @@ php artisan serve
 npm run dev
 ```
 
-e

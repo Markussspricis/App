@@ -5,7 +5,7 @@
         <h1>Login</h1>
       </div>
       <div class="div-form">
-        <form class="form" @submit.prevent="login">
+        <form class="form">
 
           <div class="email">
             <div class="input-container">
@@ -20,11 +20,11 @@
                 @input="updateLabel('email')"
                 @focus="moveLabelUp('email')"
                 @blur="resetLabelPosition('email')"
+                :class="{ 'invalid-email': !isEmailValid.value }"
               />
               <label for="email" class="input-label" :class="{ active: isLabelActive['email'], committed: isInputCommitted['email'] }">Email</label>
             </div>
-            <span v-if="!email && submitted" class="error-message">Email is required</span>
-            <span v-if="emailError" class="error-message">{{ emailError }}</span>
+            <span v-if ="emailError" class="error-message">{{ emailError }}</span>
           </div>
 
           <div class="password">
@@ -43,13 +43,12 @@
               />
               <label for="password" class="input-label" :class="{ active: isLabelActive['password'], committed: isInputCommitted['password'] }">Password</label>
             </div>
-            <span v-if="!password && submitted" class="error-message">Password is required</span>
-            <span v-if="passwordError" class="error-message">{{ passwordError }}</span>
+            <span v-if ="errorLogin" class="error-message">{{ errorLogin }}</span>
           </div>
 
           <router-link to="/password-update" class="forgot-password-link">Forgot your password</router-link>
           <div class="submit-form">
-            <button type="submit" class="next">Login</button>
+            <button type="submit" class="next" @click="validateEmail(); login($event)" :disabled="isButtonDisabled">Login</button>
           </div>
           <router-link to="/register" class="login-link">Don't have an account? Register</router-link>
         </form>
@@ -59,140 +58,126 @@
 </template>
 
 <script>
-import axios from 'axios';
-import { createStore } from 'vuex';
+  import axios from 'axios';
+  import { useStore } from 'vuex';
+  import { useRouter } from 'vue-router';
+  import { ref } from 'vue';
 
-export default {
-  name: 'Login',
-  data() {
-    return {
-      email: '',
-      password: '',
-      submitted: false,
-      serverErrors: {},
-      isLabelActive: {
-        email: false,
-        password: false,
-      },
-      isInputCommitted: {
-        email: false,
-        password: false,
-      },
-    };
-  },
-  computed: {
-    emailError() {
-      if (!this.email && this.submitted) {
-        return "Email is required";
-      } else if (this.email && !this.validEmailFormat(this.email) && this.submitted) {
-        return "Invalid email";
-      } else if (this.serverErrors.email) {
-        return this.serverErrors.email;
-      }
-      return '';
-    },
-    passwordError() {
-      if (!this.password && this.submitted) {
-        return "Password is required";
-      } else if (this.password && this.password.length < 8 && this.submitted) {
-        return "Password must be at least 8 characters long";
-      } else if (this.serverErrors.password) {
-        return this.serverErrors.password;
-      }
-      return '';
-    },
-    hasError() {
-      return (
-        this.emailError ||
-        this.passwordError
-      );
-    }
-  },
-  beforeDestroy() {
-    document.removeEventListener('click', this.handleClickOutside);
-  },
-  watch: {
-    email(newValue, oldValue) {
-      if (newValue !== oldValue) {
-        this.serverErrors.email = '';
-      }
-    },
-    password(newValue, oldValue) {
-      if (newValue !== oldValue) {
-        this.serverErrors.password = '';
-      }
-    },
-  },
-  methods: {
-    login() {
-      this.submitted = true;
-      if (this.hasError) return;
-
-      const userData = {
-        email: this.email,
-        password: this.password
+  export default {
+    name: 'Login',
+    data() {
+      return {
+        email: '',
+        password: '',
+        errorLogin:null,
+        emailError: null,
+        isLabelActive: {
+          email: false,
+          password: false,
+        },
+        isInputCommitted: {
+          email: false,
+          password: false,
+        },
       };
+    },
+    computed: {
+      isButtonDisabled() {
+        return !(this.email.length > 0 && this.password.length > 0)
+      },
+    },
+    setup () {
+      const router = useRouter();
+      const store = useStore();
+      const errorLogin = ref(null);
+      const emailError = ref(null);
+      const password = ref('');
+      const email = ref('');
+      const isEmailValid = ref(true);
 
-      axios.post('/api/login', userData)
-        .then(response => {
-          console.log('Login response:', response);
-          if (response && response.data && response.data.message === 'Login successful') {
-            console.log('Redirecting to Home');
-            this.$store.commit('login');
-            this.$router.push('/home');
-            this.resetForm();
-          } else {
-            console.error('Login failed:', response && response.data ? response.data : 'Unknown error');
-            // Handle login failure here, if necessary
-          }
-        })
-        .catch(error => {
-          console.error('Login failed:', error);
-          if (error.response && error.response.data && error.response.data.message) {
-            const errors = error.response.data.message;
-            if (errors.email) {
-              this.serverErrors.email = errors.email[0];
+      if (store.state.isLoggedIn) {
+        router.push('/home');
+      }
+
+      const validateEmail = async () => {
+        email.value = email.value.toLowerCase();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        isEmailValid.value = emailRegex.test(email.value);
+
+        if (isEmailValid.value) {
+          try {
+            const response = await axios.post('/api/check-email', {
+              Email: email.value,
+            });
+
+            const data = response.data;
+
+            if (data.success) {
+              emailError.value = null;
+
+            } else {
+              emailError.value = 'Email is not registered.';
+              setTimeout(() => { emailError.value = null; }, 3000);
             }
-            if (errors.password) {
-              this.serverErrors.password = errors.password[0];
-            }
+          } catch (error) {
+            emailError.value = null;
           }
-        });
-    },
-    validEmailFormat(email) {
-      const emailPattern = /^\S+@\S+\.\S+$/;
-      return emailPattern.test(email);
-    },
-    updateLabel(fieldName) {
-      this.isLabelActive[fieldName] = this[fieldName].length > 0;
-      this.isInputCommitted[fieldName] = false;
-    },
-    moveLabelUp(fieldName) {
-      this.isLabelActive[fieldName] = true;
-      this.isInputCommitted[fieldName] = false;
-    },
-    resetLabelPosition(fieldName) {
-      if (this[fieldName].length === 0) {
-        this.isLabelActive[fieldName] = false;
+        } else{
+          emailError.value = 'Please enter a valid email.';
+          setTimeout(() => { emailError.value = null; }, 3000);
+        }
+      };
+      const login = async (event) => {
+        event.preventDefault();
+        console.log('Login button clicked');
+        if (password.value.length > 0) {
+          try {
+            const loginSuccess = await store.dispatch('login', {
+              Email: email.value,
+              Password: password.value,
+            });
+
+            console.log('Login success:', loginSuccess);
+
+            if (loginSuccess) {
+              router.push('/home');
+            }
+          } catch (error) {
+            errorLogin.value = 'Invalid password.';
+            setTimeout(() => { errorLogin.value = null; }, 3000);
+            console.error(error);
+          }
+        }
+      };
+      return {
+        email,
+        password,
+        isEmailValid,
+        validateEmail,
+        login,
+        errorLogin,
+        emailError,
       }
-      if (this[fieldName].length > 0) {
-        this.isInputCommitted[fieldName] = true;
-      }
     },
-    handleClickOutside(event) {
-      const inputContainer = this.$el.querySelector('.input-container');
-      if (inputContainer && !inputContainer.contains(event.target)) {
-        this.resetLabelPosition();
-      }
-    },
-    resetForm() {
-      this.email = '';
-      this.password = '';
-      this.submitted = false;
-      this.serverErrors = {};
+    methods: {
+      updateLabel(fieldName) {
+        this.isLabelActive[fieldName] = this[fieldName].length > 0;
+        this.isInputCommitted[fieldName] = false;
+      },
+      moveLabelUp(fieldName) {
+        this.isLabelActive[fieldName] = true;
+        this.isInputCommitted[fieldName] = false;
+      },
+      resetLabelPosition(fieldName) {
+        if (this[fieldName].length === 0) {
+          this.isLabelActive[fieldName] = false;
+        }
+        if (this[fieldName].length > 0) {
+          this.isInputCommitted[fieldName] = true;
+        }
+      },
     }
   }
-}
 </script>
 
 <style lang="scss" scoped>
@@ -306,7 +291,11 @@ export default {
               cursor: pointer;
               color: white;
             }
-            .next:hover {
+            .next:disabled{
+              color: gray;
+              background-color: #0e537e;
+            }
+            .next:not(:disabled):hover {
               background-color: #2394db;
             }
           }
