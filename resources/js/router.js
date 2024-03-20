@@ -44,62 +44,50 @@ const router = createRouter({
       component: () => import('./components/Home/Home.vue'),
       meta: { requiresAuth: true },
     },
-    // {
-    //   path: '/explore',
-    //   component: () => import('./components/explore/explore.vue'),
-    //   meta: { requiresAuth: true },
-    // },
-    // {
-    //   path: '/trends',
-    //   component: () => import('./components/trends/trends.vue'),
-    //   meta: { requiresAuth: true },
-    // },
-    // {
-    //   path: '/people',
-    //   component: () => import('./components/who-to-follow/people.vue'),
-    //   meta: { requiresAuth: true },
-    // },
-
-    // {
-    //  path: '/notifications',
-    //  component: () => import('./components/notifications/notifications.vue'),
-    //  meta: { requiresAuth: true },
-    // },
-
-    // {
-    //   path: '/tweet/:tweetID',
-    //   component: () => import('./components/tweet/tweet.vue'),
-    //   name: 'tweet',
-    //   meta: { requiresAuth: true },
-    // },
-    // {
-    //   path: '/profile/:UserTag',
-    //   component: () => import('./components/user/user.vue'),
-    //   name: 'profile',
-    //   meta: { requiresAuth: true },
-    // },
-    // {
-    //   path: '/bookmarks',
-    //   component: () => import('./components/bookmarks/bookmarks.vue'),
-    //   meta: { requiresAuth: true },
-    // },
-    // {
-    //   path: '/messages',
-    //   component: () => import('./components/messages/messages.vue'),
-    //   meta: { requiresAuth: true },
-    // },
-    // {
-    //   path: '/:UserTag/following',
-    //   component: () => import('./components/following/following.vue'),
-    //   name: 'following',
-    //   meta: { requiresAuth: true },
-    // },
-    // {
-    //   path: '/:UserTag/followers',
-    //   component: () => import('./components/followers/followers.vue'),
-    //   name: 'followers',
-    //   meta: { requiresAuth: true },
-    // },
+    {
+      path: '/people',
+      component: () => import('./components/Who-to-follow/People.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+     path: '/notifications',
+     component: () => import('./components/Notifications/Notifications.vue'),
+     meta: { requiresAuth: true },
+    },
+    {
+      path: '/tweet/:tweetID',
+      component: () => import('./components/Posts/Posts.vue'),
+      name: 'Posts',
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/profile/:UserTag',
+      component: () => import('./components/User/User.vue'),
+      name: 'Profile',
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/bookmarks',
+      component: () => import('./components/Bookmarks/Bookmarks.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/messages',
+      component: () => import('./components/Messages/Messages.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/:UserTag/following',
+      component: () => import('./components/Following/Following.vue'),
+      name: 'Following',
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/:UserTag/followers',
+      component: () => import('./components/Followers/Followers.vue'),
+      name: 'Followers',
+      meta: { requiresAuth: true },
+    },
   ],
 });
 

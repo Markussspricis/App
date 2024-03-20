@@ -12,13 +12,6 @@
                 </div>
             </button>
 
-            <!-- <button class="Explore" :class="{ 'active': activeRoute === '/explore' }" @click="$router.push('/explore')">
-                <div class="button-content">
-                    <ion-icon class="button-icon" name="search-outline"></ion-icon>
-                    <span class="button-text">Explore</span>
-                </div>
-            </button> -->
-
             <button class="Notifications" :class="{ 'active': activeRoute === '/notifications' }" @click="$router.push('/notifications')">
                 <div class="button-content">
                     <div class="icon-container">
@@ -49,13 +42,6 @@
                     <span class="button-text">Profile</span>
                 </div>
             </button>
-
-            <!-- <button class="More" :class="{ 'active': activeRoute === '/more' }" @click="$router.push('/more')">
-                <div class="button-content">
-                    <ion-icon class="button-icon" name="ellipsis-horizontal-circle"></ion-icon>
-                    <span class="button-text">More</span>
-                </div>
-            </button> -->
 
             <button class="Tweet" @click="() => TogglePopup('TweetTrigger')">
                 <div class="button-content">
@@ -295,7 +281,7 @@ export default{
         },
         openProfile(tag){
             const NoSymbolTag = tag.replace(/^@/, '');
-            this.$router.push({ name: 'profile', params: { UserTag : NoSymbolTag } });
+            this.$router.push({ name: 'Profile', params: { UserTag : NoSymbolTag } });
             console.log(tag);
             this.isPopupVisible = false;
         },
