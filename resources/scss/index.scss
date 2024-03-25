@@ -79,7 +79,7 @@ html,body {
 .top-top{
     height:60px;
     width:100%;
-    background-color:rgba($color: #000000, $alpha: 0.8);
+    background-color:rgba($color: white, $alpha: 0.8);
     border-bottom:solid 1px #2F3336;
     position:sticky;
     top:0;
@@ -100,11 +100,11 @@ html,body {
         border:none;
         font-size:22px;
         background:none;
-        color:white;
+        color:black;
         cursor:pointer;
         transition: all 0.3s;
         &:hover{
-            background-color: rgba($color: #1a1a1a, $alpha: 1);
+            background-color: rgba($color: #e8dddd, $alpha: 1);
         }
     }
     .top-top-top{
@@ -126,7 +126,7 @@ html,body {
             font-size: 20px;
             margin:0;
             padding:0;
-            color: white;
+            color: black;
         }
         .user-tag{
             width:100%;
@@ -142,10 +142,10 @@ html,body {
         }
     }
 }
-.warning-1 {
-    color: red;
-    font-size: 12px;
-}
+// .warning-1 {
+//     color: red;
+//     font-size: 12px;
+// }
 .mention-span{
     color:#1D9BF0;
     cursor:pointer;
@@ -161,7 +161,7 @@ html,body {
     right:0;
     height:2px;
     z-index:8;
-    background-color: black;
+    background-color: white;
 }
 .content-container{
     width:100%;
@@ -198,7 +198,7 @@ html,body {
                 font-size:20px;
             }
             &:hover{
-                background-color: #080808;
+                background-color: #e8dddd;
             }
         }
     }
@@ -225,7 +225,7 @@ html,body {
                 justify-content: flex-start;
                 align-items: center;
                 gap:5px;
-                color:white;
+                color:black;
                 padding-top:2px;
                 padding-left:5px;
                 max-width:70%;
@@ -239,7 +239,7 @@ html,body {
                 .profiletag{
                     margin:0;
                     font-size: 17px;
-                    color:#1d8dd7;
+                    color:#1da1f2;
                 }
             }
             .top{
@@ -324,12 +324,12 @@ html,body {
                         }
                         .create-tweet-icon{
                             font-size:20px;
-                            color:#1D9BF0;
+                            color:#1da1f2;
                             --ionicon-stroke-width: 40px;
                         }
                     }
                     .tweet-btn:hover{
-                        background-color: rgba($color: #1D9BF0, $alpha: 0.1);
+                        background-color: rgba($color: #1da1f2, $alpha: 0.1);
                     }
                 }
                 .post-button{
@@ -342,7 +342,7 @@ html,body {
                     text-align: center;
                     border-radius: 50px;
                     border:none;
-                    background-color: #1D9BF0;
+                    background-color: #1da1f2;
                     color:white;
                     font-size: medium;
                     font-weight: bold;
@@ -350,11 +350,11 @@ html,body {
                     cursor:pointer;
                 }
                 .post-button:hover{
-                    background-color: #1d8dd7;
+                    background-color: #2394db;
                 }
                 .post-button:disabled{
-                    background-color: #0F4E78;
-                    color:#808080;
+                    color: gray;
+                    background-color: #0e537e;
                 }
             }
         }
@@ -478,13 +478,13 @@ html,body {
                     justify-content: flex-start;
                     align-items: center;
                     gap:5px;
-                    color:white;
+                    color:black;
                     padding-top:2px;
                     .username{
                         margin:0;
                         font-weight: bold;
                         font-size: 17px;
-                        color:white;
+                        color:black;
                         max-width:40%;
                         overflow: hidden;
                         white-space: nowrap;
@@ -510,7 +510,7 @@ html,body {
                     width:100%;
                     height:auto;
                     text-align: left;
-                    color:white;
+                    color:black;
                     margin:0px;
                     padding:0px;
                     font-size:17px;
@@ -563,13 +563,13 @@ html,body {
                 }
                 .comment-btn:hover{
                     .icon-container{
-                        background-color: rgba($color: #1D9BF0, $alpha: 0.2);
+                        background-color: rgba($color: #1da1f2, $alpha: 0.2);
                         .post-icon{
-                            color:#1D9BF0;
+                            color:#1da1f2;
                         }
                     }
                     .post-btn-nr{
-                        color:#1D9BF0;
+                        color:#1da1f2;
                     }
                 }
                 .heart-btn:hover{
@@ -596,13 +596,13 @@ html,body {
                 }
                 .bookmark-btn:hover{
                     .icon-container{
-                        background-color: rgba($color: #ffffff, $alpha: 0.2);
+                        background-color: rgba($color: black, $alpha: 0.2);
                         .post-icon{
-                            color:#ffffff;
+                            color:black;
                         }
                     }
                     .post-btn-nr{
-                        color:#ffffff;
+                        color:black;
                     }
                 }
                 .icon-container{
@@ -655,7 +655,7 @@ html,body {
         color:#00BA7C !important;
     }
     .bookmarked{
-        color:#ffffff !important;
+        color:black !important;
     }
     .post-icon{
         visibility: visible !important;
@@ -664,7 +664,7 @@ html,body {
         display:none;
     }
     .post:hover{
-        background-color: #080808;
+        background-color: #f2f2f2;
     }
 }
 @media (max-width: 1200px){
@@ -747,13 +747,12 @@ html,body {
                     justify-content: flex-start;
                     align-items: center;
                     gap:7px;
-                    color:white;
+                    color:black;
                     padding-top:2px;
                     .username{
                         margin:0;
                         font-weight: bold;
                         font-size: 17px;
-                        color:white;
                         max-width:35%;
                         overflow: hidden;
                         white-space: nowrap;
@@ -779,7 +778,7 @@ html,body {
                     height:auto;
                     width:100%;
                     text-align: left;
-                    color:white;
+                    color:black;
                     p{
                         margin:0;
                     }
@@ -860,7 +859,7 @@ html,body {
                     margin:0;
                     font-weight: bold;
                     font-size: 17px;
-                    color:white;
+                    color:black;
                     max-width:35%;
                     overflow: hidden;
                     white-space: nowrap;
@@ -886,8 +885,8 @@ html,body {
                 .tweet-input{
                     width:100%;
                     height:100%;
-                    background-color: #000000;
-                    color:#ffffff;
+                    background-color: white;
+                    color:black;
                     resize: none;
                     transition: height 0.2s;
                     font-family: Arial, sans-serif;
@@ -996,13 +995,13 @@ html,body {
                 }
                 .create-tweet-icon{
                     font-size:20px;
-                    color:#1D9BF0;
+                    color:#1da1f2;
                     --ionicon-stroke-width: 40px;
                     visibility: visible;
                 }
             }
             .tweet-btn:hover{
-                background-color: rgba($color: #1D9BF0, $alpha: 0.1);
+                background-color: rgba($color: #1da1f2, $alpha: 0.1);
             }
         }
         .popup-button{
@@ -1015,18 +1014,18 @@ html,body {
             text-align: center;
             border-radius: 50px;
             border:none;
-            background-color: #1D9BF0;
+            background-color: #1da1f2;
             color:white;
             font-size: medium;
             font-weight: bold;
             transition: all 0.3s;
             cursor:pointer;
             &:hover{
-                background-color: #1d8dd7;
+                background-color: #2394db;
             }
             &:disabled{
-                background-color: #0F4E78;
-                color:#808080;
+                color: gray;
+                background-color: #0e537e;
             }
         }
     }
@@ -1041,7 +1040,7 @@ html,body {
     margin-top:10px;
     box-sizing: border-box;
     .delete-title{
-        color:white;
+        color:black;
         font-size:30px;
         font-weight:600;
         margin:0;
@@ -1139,7 +1138,7 @@ html,body {
     padding-right:10px;
     border-left: solid 1px #2F3336;
     background: none;
-    color: white;
+    color: black;
     // .search-input-container {
     //     width: 100%;
     //     height: 60px;
@@ -1203,8 +1202,8 @@ html,body {
     // }
     .who-to-follow{
         width:100%;
-        height:auto;
-        background-color: #e8dddd;
+        height:100vh;
+        background-color: #e6e6e6;
         display:flex;
         flex-direction: column;
         box-sizing: border-box;
@@ -1366,12 +1365,12 @@ html,body {
             padding-left:25px;
             background: none;
             font-size:18px;
-            color:#1D9BF0;
+            color:#1da1f2;
             cursor: pointer;
             transition:all 0.3s;
         }
         .show-more-btn:hover{
-            background-color: #1D1F23;
+            background-color: #e8dddd;
         }
     }
 }
@@ -1589,12 +1588,12 @@ html,body {
                             cursor:pointer;
                             .create-tweet-icon{
                                 font-size:18px;
-                                color:#1D9BF0;
+                                color:#1da1f2;
                                 --ionicon-stroke-width: 40px;
                             }
                         }
                         .tweet-btn:hover{
-                            background-color: rgba($color: #1D9BF0, $alpha: 0.1);
+                            background-color: rgba($color: #1da1f2, $alpha: 0.1);
                         }
                     }
                     .post-button{
@@ -1674,7 +1673,7 @@ html,body {
                             justify-content: flex-start;
                             align-items: center;
                             gap:5px;
-                            color:white;
+                            color:black;
                             padding-top:2px;
                             .username{
                                 max-width:40%;
@@ -1684,7 +1683,6 @@ html,body {
                                 margin:0;
                                 font-weight: bold;
                                 font-size: 14px;
-                                color:white;
                             }
                             .usertag{
                                 max-width:40%;
@@ -1707,7 +1705,7 @@ html,body {
                             width:100%;
                             height:auto;
                             text-align: left;
-                            color:white;
+                            color:black;
                             padding:0px;
                             font-size:14px;
                             p{

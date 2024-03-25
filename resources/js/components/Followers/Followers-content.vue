@@ -1,6 +1,6 @@
 <template>
     <div class="followers-container">
-        <div class="black-line"></div>
+        <!-- <div class="black-line"></div> -->
         <div class="top-bar">
             <button class="back-icon" @click="goBack">
                 <ion-icon name="arrow-back-outline"></ion-icon>
@@ -138,21 +138,21 @@ export default {
 .followers-container{
     width:100%;
     height:auto;
-    color:white;
+    color:black;
 }
-.black-line{
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    height:2px;
-    z-index:8;
-    background-color: black;
-}
+// .black-line{
+//     position:fixed;
+//     top:0;
+//     left:0;
+//     right:0;
+//     height:2px;
+//     z-index:8;
+//     background-color: black;
+// }
 .top-bar{
     height:60px;
     width:100%;
-    background-color:rgba($color: #000000, $alpha: 0.8);
+    background-color:rgba($color: white, $alpha: 0.8);
     border-bottom:solid 1px #2F3336;
     position:sticky;
     top:0;
@@ -174,11 +174,11 @@ export default {
         border:none;
         font-size:22px;
         background:none;
-        color:white;
+        color:black;
         cursor:pointer;
         transition: all 0.3s;
         &:hover{
-            background-color: rgba($color: #1a1a1a, $alpha: 1);
+            background-color: rgba($color: #e8dddd, $alpha: 1);
         }
     }
     .profile-top{
@@ -194,7 +194,7 @@ export default {
             height:50%;
             display:flex;
             align-items: center;
-            color:white;
+            color:black;
             justify-content: flex-start;
             box-sizing: border-box;
             font-weight: bold;
@@ -286,7 +286,7 @@ export default {
             justify-content: center;
         }
         &:hover{
-            background-color: rgba($color: #1a1a1a, $alpha: 0.9);
+            background-color: rgba($color: #e8dddd, $alpha: 0.9);
         }
     }
 }

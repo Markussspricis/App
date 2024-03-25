@@ -382,7 +382,6 @@
   }
   select option:disabled { display: none; }
   select option { color: black; }
-
   .account-background{
     background:rgba(29, 161, 242, 0.1);
     z-index: 99;
@@ -402,7 +401,6 @@
       background-color: white;
       border-radius: 20px;
       border: 1px solid #1da1f2;
-      font-family: Arial, Helvetica, sans-serif;
       color: black;
       .heading_create {
         position: absolute;
@@ -536,6 +534,7 @@
               top: 600px;
               cursor: pointer;
               color: white;
+              transition: all 0.3s;
             }
             .next:disabled{
               color: gray;

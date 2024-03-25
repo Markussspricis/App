@@ -1,6 +1,6 @@
 <template>
     <div class="content-container">
-        <!-- <div class="black-line"></div> -->
+        <div class="black-line"></div>
         <div class="top-bar">
             <div class="title">Home</div>
             <div class="title2" v-if="user">
@@ -37,7 +37,7 @@
                         <div class="buttons">
                             <button class="tweet-btn"><input type="file" accept="image/png, image/gif, image/jpeg, video/mp4,video/x-m4v,video/*" id="tweet-img-input" @change="onImageChange" hidden><label for="tweet-img-input" class="tweet-img-label"><ion-icon name="images-outline" class="create-tweet-icon"></ion-icon></label></button>
                             <button class="tweet-btn"><ion-icon name="happy-outline" class="create-tweet-icon"></ion-icon></button>
-                            <button class="tweet-btn" @click.stop="TogglePopup('MentionTrigger', 'tweet')"><ion-icon name="at-sharp" class="create-tweet-icon"></ion-icon></button>
+                            <!-- <button class="tweet-btn" @click.stop="TogglePopup('MentionTrigger', 'tweet')"><ion-icon name="at-sharp" class="create-tweet-icon"></ion-icon></button> -->
                         </div>
                         <button class="post-button" @click="createTweet" :disabled="buttonDisabled || tweet_text_input === '' && !tweetImage">Post</button>
                     </div>
@@ -131,13 +131,13 @@
             <div class="bottom">
                 <div class="buttons">
                     <button class="tweet-btn"><ion-icon name="happy-outline" class="create-tweet-icon"></ion-icon></button>
-                    <button class="tweet-btn" @click.stop="TogglePopup('MentionTrigger', 'comment')"><ion-icon name="at-sharp" class="create-tweet-icon"></ion-icon></button>
+                    <!-- <button class="tweet-btn" @click.stop="TogglePopup('MentionTrigger', 'comment')"><ion-icon name="at-sharp" class="create-tweet-icon"></ion-icon></button> -->
                 </div>
-                <button class="popup-button" @click="createComment(tweetIdInPopup, comment_text_input)" :disabled="buttonDisabled">Comment</button><!-- Izdomā kā comment poga nodos tweetID. -->
+                <button class="popup-button" @click="createComment(tweetIdInPopup, comment_text_input)" :disabled="buttonDisabled || !comment_text_input">Comment</button><!-- Izdomā kā comment poga nodos tweetID. -->
             </div>
         </div>
     </Popup>
-    <Popup v-if="popupTriggers.MentionTrigger" :TogglePopup="() => TogglePopup('MentionTrigger')">
+    <!-- <Popup v-if="popupTriggers.MentionTrigger" :TogglePopup="() => TogglePopup('MentionTrigger')">
         <div class="mention-popup">
             <p class="title">Mention</p>
             <div class="search-input-container">
@@ -173,7 +173,7 @@
                 </div>
             </div>
         </div>
-    </Popup>
+    </Popup> -->
     <div class="profile-popup" v-if="isPopupVisible">
         <div class="popup-content">
             <button class="logout-btn" @click="logoutUser">Logout</button>
@@ -630,7 +630,7 @@ export default{
             console.log(tag);
         },
         openTweet(id) {
-            this.$router.push({ name: 'tweet', params: { tweetID: id } });
+            this.$router.push({ name: 'Posts', params: { tweetID: id } });
             console.log(id);
         },
         toggleLike(tweetID) {
@@ -797,21 +797,21 @@ export default{
                 console.error('Error unbookmarking the tweet:', error);
             }
         },
-        getAllUsersMention() {
-        axios
-            .get('/api/all-users-mention')
-            .then(response => {
-                this.users = response.data;
-            })
-            .catch(error => {
-                console.error(error);
-            });
-        },
+        // getAllUsersMention() {
+        // axios
+        //     .get('/api/all-users-mention')
+        //     .then(response => {
+        //         this.users = response.data;
+        //     })
+        //     .catch(error => {
+        //         console.error(error);
+        //     });
+        // },
     },
     async mounted() {
         window.addEventListener('scroll', this.handleScroll);
         await this.$store.dispatch('initializeApp');
-        this.getAllUsersMention();
+        // this.getAllUsersMention();
         this.loadTweets('following');
         this.loadTweets('all');
         this.NewTweetInterval = setInterval(() => {
@@ -904,7 +904,7 @@ export default{
             border:none;
             background:none;
             transition:all 0.3s;
-            color:rgb(86, 81, 81);
+            color:#71767B;
             font-size: 16px;
             font-weight:600;
             &:hover{
@@ -919,7 +919,7 @@ export default{
                 bottom:1px;
                 left:50%;
                 transform: translateX(-50%);
-                background-color: #1D9BF0;
+                background-color: #1da1f2;
                 &.active{
                     display:block;
                 }

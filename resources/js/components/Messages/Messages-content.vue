@@ -526,7 +526,7 @@ export default{
             box-sizing: border-box;
             border-right: 1px solid #2F3336;
             .main-text{
-                color: white;
+                color: black;
                 text-align:left;
                 font-size: 32px;
                 font-weight: bold;
@@ -547,7 +547,7 @@ export default{
                 display: block;
                 width: 170px;
                 align-items: center;
-                background:#1d9bf0;
+                background:#1da1f2;
                 color: white;
                 text-align: center;
                 margin-top: 35px;
@@ -558,7 +558,7 @@ export default{
                 border: none;
                 height: 50px;
                 &:hover{
-                    background:#0c79c2
+                    background-color:#2394db;
                 }
             }
         }
@@ -568,7 +568,7 @@ export default{
             box-sizing: border-box;
             justify-content: center;
             .right-text{
-                color: white;
+                color: black;
                 text-align: left;
                 font-size: 32px;
                 font-weight: bold;
@@ -590,7 +590,7 @@ export default{
             .right-write-button{
                 display: block;
                 width: 170px;
-                background:#1d9bf0;
+                background:#1da1f2;
                 color: white;
                 text-align: center;
                 margin-top: 35px;
@@ -601,7 +601,7 @@ export default{
                 border: none;
                 height: 50px;
                 &:hover{
-                    background:#0c79c2
+                    background-color:#2394db;
                 }
             }
         }
@@ -619,7 +619,7 @@ export default{
             padding:0;
             font-weight: bold;
             font-size: 22px;
-            color: white;
+            color: black;
         }
         .next-btn{
             position:absolute;
@@ -630,34 +630,22 @@ export default{
             display:flex;
             align-items: center;
             justify-content: center;
-            color:#000000;
+            color:white;
             border:none;
-            background-color: white;
+            background-color: #1da1f2;
             border-radius: 50px;
             font-size: 14px;
             font-weight: bold;
             padding:8px 16px;
+            transition: all 0.3s;
             cursor: pointer;
             &:hover{
-                background-color:rgba($color: #f2f2f2, $alpha: 0.8);
+                background-color: #2394db;
             }
         }
         .next-btn:disabled {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: auto;
-            height: auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             color: gray;
-            border: none;
-            background-color: white;
-            border-radius: 50px;
-            font-size: 14px;
-            font-weight: bold;
-            padding: 8px 16px;
+            background-color: #0e537e;
             cursor: default;
         }
         .search-people{
@@ -667,7 +655,7 @@ export default{
                 width:100%;
                 display:flex;
                 align-items: center;
-                background-color:rgba($color: #000000, $alpha: 0.8);
+                background-color:rgba($color: white, $alpha: 0.8);
                 backdrop-filter: blur(5px);
                 position:sticky;
                 top:0;
@@ -680,19 +668,19 @@ export default{
                     border-radius: 50px;
                     padding-left:60px;
                     border:  1px solid transparent;
-                    background-color: #202327;
+                    background-color: #e8dddd;
                     position: relative;
-                    color:white;
+                    color:black;
                     font-size: medium;
                     &.focused {
                         outline:none;
-                        background-color: black;
-                        border-color: #1D9BF0;
-                        box-shadow: 0 0 5px #1D9BF0;
+                        background-color: white;
+                        border-color: #1da1f2;
+                        box-shadow: 0 0 5px #1da1f2;
                     }
                 }
                 .Edit-Input:focus + .search-icon{
-                    color: #1D9BF0;
+                    color: #1da1f2;
                 }
                 .Edit-Input::-webkit-input-placeholder {
                     color: #71767B;
@@ -761,7 +749,7 @@ export default{
                             justify-content: flex-start;
                             gap:5px;
                             .username{
-                                color: white;
+                                color: black;
                                 font-weight: bold;
                                 font-size: 16px;
                                 margin:0;
@@ -775,7 +763,7 @@ export default{
                     }
                 }
                 .highlighted {
-                    border: 2px solid #1D9BF0;
+                    border: 2px solid #1da1f2;
                     border-radius: 50px;
                 }
             }
@@ -790,7 +778,7 @@ export default{
         justify-content: space-between;
         padding:0px 0px 0px 0px;
         .title-messages{
-            color: white;
+            color: black;
             margin-left:20px;
             padding-top:50px;
             font-weight: bold;
@@ -833,7 +821,7 @@ export default{
                         margin:0;
                         font-weight: bold;
                         font-size: 17px;
-                        color:white;
+                        color:black;
                         max-width:35%;
                         overflow: hidden;
                         white-space: nowrap;
@@ -859,8 +847,8 @@ export default{
                     .message-input{
                         width:100%;
                         height:100%;
-                        background-color: #000000;
-                        color:#ffffff;
+                        background-color: white;
+                        color:black;
                         resize: none;
                         transition: height 0.2s;
                         font-family: Arial, sans-serif;
@@ -932,13 +920,13 @@ export default{
                     }
                     .create-message-icon{
                         font-size:20px;
-                        color:#1D9BF0;
+                        color:#1da1f2;
                         --ionicon-stroke-width: 40px;
                         visibility: visible;
                     }
                 }
                 .message-btn:hover{
-                    background-color: rgba($color: #1D9BF0, $alpha: 0.1);
+                    background-color: rgba($color: #1da1f2, $alpha: 0.1);
                 }
             }
             .popup-button{
@@ -951,18 +939,18 @@ export default{
                 text-align: center;
                 border-radius: 50px;
                 border:none;
-                background-color: #1D9BF0;
+                background-color: #1da1f2;
                 color:white;
                 font-size: medium;
                 font-weight: bold;
                 transition: all 0.3s;
                 cursor:pointer;
                 &:hover{
-                    background-color: #1d8dd7;
+                    background-color: #2394db;
                 }
                 &:disabled{
-                    background-color: #0F4E78;
-                    color:#808080;
+                    color: gray;
+                    background-color: #0e537e;
                     cursor: default;
                 }
             }
@@ -978,7 +966,7 @@ export default{
         justify-content: space-between;
         padding:0px 0px 0px 0px;
         .title-messages{
-            color: white;
+            color: black;
             margin-left:20px;
             padding-top:50px;
             font-weight: bold;
@@ -993,16 +981,16 @@ export default{
             display:flex;
             align-items: center;
             justify-content: center;
-            color:#000000;
+            color:white;
             border:none;
-            background-color: white;
+            background-color: #1da1f2;
             border-radius: 50px;
             font-size: 14px;
             font-weight: bold;
             padding:8px 16px;
             cursor: pointer;
             &:hover{
-                background-color:rgba($color: #f2f2f2, $alpha: 0.8);
+                background-color: #2394db;
             }
         }
         .message-container{
@@ -1024,7 +1012,7 @@ export default{
                 outline:none;
             }
             .received-message{
-                color:white;
+                color:black;
                 margin-left: 20px;
                 margin-right: 20px;
                 .message-p{
@@ -1084,7 +1072,7 @@ export default{
         justify-content: space-between;
         padding:0px 0px 0px 0px;
         .title-messages{
-            color: white;
+            color: black;
             margin-left:20px;
             padding-top:50px;
             font-weight: bold;
@@ -1109,7 +1097,7 @@ export default{
                 outline:none;
             }
             .sent-message{
-                color:white;
+                color:black;
                 margin-left: 20px;
                 margin-right: 20px;
                 .message-p{

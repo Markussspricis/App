@@ -24,8 +24,4 @@ class Comment extends Model
     {
         return $this->belongsTo(Tweet::class, 'TweetID'); // Define the relationship with the Tweet model
     }
-    // public function comment_mentions()
-    // {
-    //     return $this->hasMany(CommentMention::class, 'CommentID');
-    // }
 }

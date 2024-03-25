@@ -51,7 +51,7 @@ Route::middleware('auth:sanctum')->post('/follow/{userId}', [FollowController::c
 Route::middleware('auth:sanctum')->post('/unfollow/{userId}', [FollowController::class, 'unfollow']);
 Route::middleware('auth:sanctum')->get('/topFollowedUsers', [FollowController::class, 'topFollowedUsers']);
 Route::middleware('auth:sanctum')->get('/allusers', [FollowController::class, 'getAllUsersExceptMe']);
-Route::middleware('auth:sanctum')->get('/all-users-mention', [FollowController::class, 'getAllUsersMention']);
+// Route::middleware('auth:sanctum')->get('/all-users-mention', [FollowController::class, 'getAllUsersMention']);
 Route::get('/countFollowersAndFollowing/{userID}', [FollowController::class, 'countFollowersAndFollowing']);
 Route::middleware('auth:sanctum')->get('/following/{tag}', [FollowController::class, 'getFollowingUsers']);
 Route::middleware('auth:sanctum')->get('/followers/{tag}', [FollowController::class, 'getFollowers']);

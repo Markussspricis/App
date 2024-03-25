@@ -39,7 +39,6 @@
 
 <style lang="scss" scoped>
   .app {
-    font-family: Arial, sans-serif;
     margin: 0 auto;
     display: flex;
     flex-direction: row;

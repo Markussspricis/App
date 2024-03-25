@@ -5,7 +5,7 @@
             <button class="back-btn" @click="goBack">
                 <ion-icon name="arrow-back-outline"></ion-icon>
             </button>
-            <div class="title">Tweet</div>
+            <div class="title">Post</div>
         </div>
         <div class="post-container">
             <div class="post" v-if="tweet && tweet.user">
@@ -87,9 +87,9 @@
                     <div class="bottom">
                         <div class="buttons">
                             <button class="tweet-btn"><ion-icon name="happy-outline" class="create-tweet-icon"></ion-icon></button>
-                            <button class="tweet-btn" @click.stop="TogglePopup('MentionTrigger', 'main')"><ion-icon name="at-sharp" class="create-tweet-icon"></ion-icon></button>
+                            <!-- <button class="tweet-btn" @click.stop="TogglePopup('MentionTrigger', 'main')"><ion-icon name="at-sharp" class="create-tweet-icon"></ion-icon></button> -->
                         </div>
-                        <button class="post-button" @click="createComment(tweet.TweetID, main_comment_text_input, mainInput)" :disabled="buttonDisabled">Reply</button>
+                        <button class="post-button" @click="createComment(tweet.TweetID, main_comment_text_input, mainInput)" :disabled="buttonDisabled || !main_comment_text_input">Reply</button>
                     </div>
                 </div>
             </div>
@@ -135,7 +135,7 @@
             <div class="bottom">
                 <div class="buttons">
                     <button class="tweet-btn"><ion-icon name="happy-outline" class="create-tweet-icon"></ion-icon></button>
-                    <button class="tweet-btn" @click.stop="TogglePopup('MentionTrigger', 'popup')"><ion-icon name="at-sharp" class="create-tweet-icon"></ion-icon></button>
+                    <!-- <button class="tweet-btn" @click.stop="TogglePopup('MentionTrigger', 'popup')"><ion-icon name="at-sharp" class="create-tweet-icon"></ion-icon></button> -->
                 </div>
                 <button class="popup-button" @click="createComment(tweetIdInPopup, popup_comment_text_input, popupInput)" :disabled="buttonDisabled">Comment</button>
             </div>
@@ -644,7 +644,7 @@ export default {
 .top-bar{
     height:60px;
     width:100%;
-    background-color:rgba($color: #000000, $alpha: 0.8);
+    background-color:rgba($color: white, $alpha: 0.8);
     border-bottom:solid 1px #2F3336;
     position:sticky;
     top:0;
@@ -654,16 +654,6 @@ export default {
     display: flex;
     align-items: center;
     padding:0 10px;
-    .title{
-        width:100%;
-        display:flex;
-        align-items: center;
-        justify-content: flex-start;
-        box-sizing: border-box;
-        padding-left:20px;
-        font-weight: bold;
-        font-size: 22px;
-    }
     .back-btn{
         display:flex;
         align-items: center;
@@ -675,12 +665,23 @@ export default {
         border:none;
         font-size:22px;
         background:none;
-        color:white;
+        color:black;
         cursor:pointer;
         transition: all 0.3s;
         &:hover{
-            background-color: rgba($color: #1a1a1a, $alpha: 1);
+            background-color: rgba($color: #e8dddd, $alpha: 1);
         }
+    }
+    .title{
+        width:100%;
+        display:flex;
+        align-items: center;
+        justify-content: flex-start;
+        box-sizing: border-box;
+        padding-left:20px;
+        font-weight: bold;
+        font-size: 22px;
+        color: black;
     }
 }
 .post-container{

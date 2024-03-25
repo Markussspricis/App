@@ -25,6 +25,9 @@
         display:flex;
         flex-direction: row;
         box-sizing: border-box;
+        .content{
+            width: 100%;
+        }
     }
     @media (max-width: 1250px) {
         .content{

@@ -1,6 +1,6 @@
 <template>
     <div class="content-container">
-        <div class="black-line"></div>
+        <!-- <div class="black-line"></div> -->
         <div class="top-bar">
             <button class="back-icon" @click="goBack">
                 <ion-icon name="arrow-back-outline"></ion-icon>
@@ -250,8 +250,8 @@
         </Popup>
         <Popup v-if="popupTriggers.DeleteTrigger" :TogglePopup="() => TogglePopup('DeleteTrigger')">
             <div class="delete-popup">
-                <h1 class="delete-title">Delete Tweet</h1>
-                <p class="tweet-p">Are you sure you want to delete this tweet?</p>
+                <h1 class="delete-title">Delete Post</h1>
+                <p class="tweet-p">Are you sure you want to delete this post?</p>
                 <div class="tweet-buttons">
                     <button class="cancel-button" @click="TogglePopup('DeleteTrigger')">Cancel</button>
                     <button class="delete-button" @click.stop="deleteTweet(deleteTweetID)">Delete</button>
@@ -826,7 +826,7 @@ export default{
             console.log(tag);
         },
         openTweet(id) {
-            this.$router.push({ name: 'tweet', params: { tweetID: id } });
+            this.$router.push({ name: 'Posts', params: { tweetID: id } });
             console.log(id);
         },
         deleteTweet(tweetID) {
@@ -1171,7 +1171,7 @@ export default{
 .top-bar{
     height:60px;
     width:100%;
-    background-color:rgba($color: #000000, $alpha: 0.8);
+    background-color:rgba($color: white, $alpha: 0.8);
     border-bottom:solid 1px #2F3336;
     position:sticky;
     top:0;
@@ -1193,11 +1193,11 @@ export default{
         border:none;
         font-size:22px;
         background:none;
-        color:white;
+        color:black;
         cursor:pointer;
         transition: all 0.3s;
         &:hover{
-            background-color: rgba($color: #1a1a1a, $alpha: 1);
+            background-color: rgba($color: #e8dddd, $alpha: 1);
         }
     }
     .profile-top{
@@ -1212,7 +1212,7 @@ export default{
         .title{
             width:100%;
             height:50%;
-            color:white;
+            color:black;
             box-sizing: border-box;
             font-weight: bold;
             font-size: 20px;
@@ -1279,7 +1279,7 @@ export default{
             color:white;
             font-size: 17px;
             font-weight: bold;
-            border:1px solid #6A6F74;
+            border:3px solid #1da1f2;
             border-radius: 50px;
             background-color: #000000;
             cursor: pointer;
@@ -1296,6 +1296,7 @@ export default{
         box-sizing: border-box;
         padding:15px;
         gap:15px;
+        color: black;
         .user-info{
             width:100%;
             height:auto;
@@ -1353,11 +1354,11 @@ export default{
                     color:#92969a;
                     border-bottom:1px solid #92969a;
                     .bold{
-                        color:white;
+                        color:black;
                     }
                 }
                 .bold{
-                    color:white;
+                    color:black;
                     font-weight: bold;
                     padding-right:5px;
                 }
@@ -1389,17 +1390,17 @@ export default{
         font-size: 16px;
         font-weight:600;
         &:hover{
-            background-color:rgba($color: #202223, $alpha: 0.8);
+            background-color:rgba($color: #e8dddd, $alpha: 0.8);
         }
     }
     .active-post-type{
-        color:white;
+        color:black;
         font-weight: 700;
     }
     .active-line{
         height:4px;
         width:75px;
-        background-color: #1D9BF0;
+        background-color: #1da1f2;
         border-radius:5px;
         position:absolute;
         bottom:1px;
@@ -1442,6 +1443,7 @@ export default{
         padding:0;
         font-weight: bold;
         font-size: 22px;
+        color: black;
     }
     .save-btn{
         position:absolute;
@@ -1452,16 +1454,16 @@ export default{
         display:flex;
         align-items: center;
         justify-content: center;
-        color:#000000;
+        color:white;
         border:none;
-        background-color: white;
+        background-color: #1da1f2;
         border-radius: 50px;
         font-size: 14px;
         font-weight: bold;
         padding:8px 16px;
         cursor: pointer;
         &:hover{
-            background-color:rgba($color: #f2f2f2, $alpha: 0.8);
+            background-color: #2394db;
         }
     }
     .content{
@@ -1540,17 +1542,17 @@ export default{
         .input-wrap{
             border: none;
             border-radius:6px;
-            font-family: Arial, sans-serif;
+            // font-family: Arial, sans-serif;
             position:relative;
             width:auto;
             height: 60px;
             box-sizing: border-box;
             display:flex;
             .Edit-Input{
-                font-family: Arial, sans-serif;
+                // font-family: Arial, sans-serif;
                 box-sizing:border-box;
                 border: 1px solid #434343;
-                color:#ffffff;
+                color:black;
                 padding: 20px 13px 5px 13px;
                 outline:none;
                 background: none;
@@ -1612,7 +1614,7 @@ export default{
             .Edit-Textarea{
                 font-family: Arial, sans-serif;
                 box-sizing:border-box;
-                color:#ffffff;
+                color:black;
                 padding: 0px 13px 0px 13px;
                 outline:none;
                 background: none;

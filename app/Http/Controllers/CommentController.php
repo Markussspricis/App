@@ -9,7 +9,6 @@ use App\Models\Comment;
 use App\Models\Tweet;
 use App\Models\User;
 use App\Models\Notification;
-use App\Models\CommentMention;
 
 class CommentController extends Controller
 {
@@ -26,7 +25,7 @@ class CommentController extends Controller
             $commentText = $request->input('commentText');
             if ($request->has('commentText')) {
                 $comment->CommentText = $request->input('commentText');
-                $mentions = $this->extractMentions($comment->CommentText);
+                // $mentions = $this->extractMentions($comment->CommentText);
             }
     
 /*             if ($request->hasFile('commentImage')) {
@@ -37,34 +36,34 @@ class CommentController extends Controller
             $comment->UserID = $user->UserID;
             $comment->TweetID = $tweet->TweetID;
             $tweet->comments()->save($comment);
-            if (!empty($mentions)) {
-                foreach ($mentions as $mention) {
-                    $mentionModel = new CommentMention([
-                        'MentionedUserID' => $mention->UserID,
-                        'UserID' => $user->UserID,
-                    ]);
-                    $comment->comment_mentions()->save($mentionModel);
-                    if ($mention->UserID != $user->UserID) {
-                        $existingMentionNotification = Notification::where('SenderID', $user->UserID)
-                            ->where('ReceiverID', $mention->UserID)
-                            ->where('NotificationType', 'mention')
-                            ->where('NotificationLink', '/tweet/' . $tweet->TweetID)
-                            ->where('created_at', '>=', Carbon::now()->subMinutes(0.2))
-                            ->first();
-                        if (!$existingMentionNotification) {
-                            $mentionnotifcation = new Notification([
-                                'SenderID' => $user->UserID,
-                                'ReceiverID' => $mention->UserID,
-                                'NotificationType' => 'mention',
-                                'NotificationText' => ' mentioned you in a comment',
-                                'NotificationLink' => '/tweet/' . $tweet->TweetID,
-                                'Read' => false,
-                            ]);
-                            $mentionnotifcation->save();
-                        }
-                    }
-                }
-            }
+            // if (!empty($mentions)) {
+            //     foreach ($mentions as $mention) {
+            //         $mentionModel = new CommentMention([
+            //             'MentionedUserID' => $mention->UserID,
+            //             'UserID' => $user->UserID,
+            //         ]);
+            //         $comment->comment_mentions()->save($mentionModel);
+            //         if ($mention->UserID != $user->UserID) {
+            //             $existingMentionNotification = Notification::where('SenderID', $user->UserID)
+            //                 ->where('ReceiverID', $mention->UserID)
+            //                 ->where('NotificationType', 'mention')
+            //                 ->where('NotificationLink', '/tweet/' . $tweet->TweetID)
+            //                 ->where('created_at', '>=', Carbon::now()->subMinutes(0.2))
+            //                 ->first();
+            //             if (!$existingMentionNotification) {
+            //                 $mentionnotifcation = new Notification([
+            //                     'SenderID' => $user->UserID,
+            //                     'ReceiverID' => $mention->UserID,
+            //                     'NotificationType' => 'mention',
+            //                     'NotificationText' => ' mentioned you in a comment',
+            //                     'NotificationLink' => '/tweet/' . $tweet->TweetID,
+            //                     'Read' => false,
+            //                 ]);
+            //                 $mentionnotifcation->save();
+            //             }
+            //         }
+            //     }
+            // }
             if ($tweet->UserID != $user->UserID){
                 $existingCommentNotification = Notification::where('SenderID', $user->UserID)
                     ->where('ReceiverID', $tweet->UserID)
@@ -92,16 +91,16 @@ class CommentController extends Controller
         }
     }
 
-    private function extractMentions($Text)
-    {
-        preg_match_all('/@(\w+)/u', $Text, $matches);
+    // private function extractMentions($Text)
+    // {
+    //     preg_match_all('/@(\w+)/u', $Text, $matches);
     
-        $usernames = $matches[1];
-        $usernamesWithAtSymbol = array_map(function ($username) {
-            return '@' . $username;
-        }, $usernames);
-        return User::whereIn('UserTag', $usernamesWithAtSymbol)->get();
-    }
+    //     $usernames = $matches[1];
+    //     $usernamesWithAtSymbol = array_map(function ($username) {
+    //         return '@' . $username;
+    //     }, $usernames);
+    //     return User::whereIn('UserTag', $usernamesWithAtSymbol)->get();
+    // }
 
     public function deleteComment($id)
     {
@@ -109,7 +108,7 @@ class CommentController extends Controller
         if (!$comment) {
             return response()->json(['message' => 'Comment not found'], 404);
         }
-        $comment->comment_mentions()->delete();
+        // $comment->comment_mentions()->delete();
         $comment->delete();
         return response()->json(['message' => 'Comment deleted successfully']);
     }

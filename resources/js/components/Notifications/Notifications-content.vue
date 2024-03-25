@@ -19,13 +19,13 @@
                     </div>
                     <div class="active-line" :class ="{ 'active': notiType == 'all' }"></div>
                 </button>
-                <button @click="switchToVerified" class="noti-type-btn" :class ="{ 'active-noti-type': notiType == 'verified' }">
+                <!-- <button @click="switchToVerified" class="noti-type-btn" :class ="{ 'active-noti-type': notiType == 'verified' }">
                     <div class="noti-title">
                         Verified
                         <div class="noti-count" v-if="verified_count > 0">{{ verified_count }}</div>
                     </div>
                     <div class="active-line" :class ="{ 'active': notiType == 'verified' }"></div>
-                </button>
+                </button> -->
                 <button @click="switchToMentions" class="noti-type-btn" :class ="{ 'active-noti-type': notiType == 'mentions' }">
                     <div class="noti-title">
                         Mentions
@@ -35,7 +35,7 @@
                 </button>
             </div>
             <div class="notification-buttons">
-                <input type="checkbox" @click.stop="selectAll()" id="selectAllCheckBox" title="Select all">
+                <input type="checkbox" class="checkbox" @click.stop="selectAll()" id="selectAllCheckBox" title="Select all">
                 <button @click="selectUnread" class="noti-btn" title="Select unread"><ion-icon name="mail-unread"></ion-icon></button>
                 <button @click="selectRead" class="noti-btn" title="Select read"><ion-icon name="mail-open"></ion-icon></button>
                 <button @click="markSelectedAsRead" class="noti-btn" title="Mark selected as read"><ion-icon name="book"></ion-icon></button>
@@ -62,7 +62,8 @@
                     <div class="time"><p>{{ notification.created_ago }}</p></div>
                 </div>
                 <div>
-                    <input type="checkbox"            
+                    <input type="checkbox"
+                    class="checkbox"            
                     :checked="isSelected(notification)"
                     @click.stop="markCheckbox(notification)"
                     :id="notification.NotificationID+'_notification'">
@@ -296,7 +297,7 @@ input[type="checkbox"]{
     appearance: none;
     width:20px;
     height:20px;
-    background-color: #202223;
+    background-color: white;
     border-radius:5px;
     border:#2F3336 solid 2px;
     display:flex;
@@ -305,21 +306,18 @@ input[type="checkbox"]{
     cursor:pointer;
     transition:all 0.3s;
     &::after{
-        color:#1d9bf0;
+        color:#1da1f2;
         content:"✓";
         display:none;
     }
     &:checked::after{
         display:block;
     }
-    &:hover{
-        background-color: rgb(29, 31, 33);
-    }
 }
 .top-bar{
     position:sticky;
     top:0px;
-    background-color:rgba($color: #000000, $alpha: 0.8);
+    background-color:rgba($color: white, $alpha: 0.8);
     backdrop-filter: blur(5px);
     z-index:10;
     .top-top{
@@ -352,7 +350,7 @@ input[type="checkbox"]{
             font-size:16px;
             font-weight:600;
             &:hover{
-                background-color:rgba($color: #202223, $alpha: 0.8);
+                background-color:rgba($color: #e8dddd, $alpha: 0.8);
             }
             .noti-title{
                 display:flex;
@@ -361,7 +359,7 @@ input[type="checkbox"]{
                 justify-content: center;
                 gap:2px;
                 .noti-count{
-                    background-color: #1d9bf0;
+                    background-color: #1da1f2;
                     font-size:14px;
                     border-radius:20px;
                     right:5px;
@@ -376,7 +374,7 @@ input[type="checkbox"]{
             }
         }
         .active-noti-type{
-            color:white;
+            color:black;
             font-weight: 700;
         }
         .active-line{
@@ -417,7 +415,7 @@ input[type="checkbox"]{
             font-weight:600;
             cursor:pointer;
             &:hover{
-                background-color:rgba($color: #202223, $alpha: 0.8);
+                background-color:rgba($color: #e8dddd, $alpha: 0.8);
             }
             ion-icon{
                 color:#a9adb1;
@@ -441,7 +439,7 @@ input[type="checkbox"]{
         flex-direction: column;
         box-sizing: border-box;
         .main-text {
-            color: white;
+            color: black;
             text-align: left;
             font-size: 37px;
             font-weight: bold;
@@ -461,7 +459,7 @@ input[type="checkbox"]{
     }
 }
 .notification-container{
-    color:white;
+    color:black;
     box-sizing: border-box;
     height:auto;
     padding-bottom:125px;
@@ -525,19 +523,19 @@ input[type="checkbox"]{
             }
         }
         &:hover{
-            background-color: #080808;
+            background-color: #e8dddd;
         }
     }
     .unread{
-        background-color: rgba($color: #1D9BF0, $alpha: 0.1);
+        background-color: rgba($color: #1da1f2, $alpha: 0.1);
         &:hover{
-            background-color: rgba($color: #1D9BF0, $alpha: 0.12);
+            background-color: rgba($color: #1da1f2, $alpha: 0.12);
         }
     }
     .selected{
-        background-color: rgba($color: #1D9BF0, $alpha: 0.15);
+        background-color: rgba($color: #1da1f2, $alpha: 0.15);
         &:hover{
-            background-color: rgba($color: #1D9BF0, $alpha: 0.17);
+            background-color: rgba($color: #1da1f2, $alpha: 0.17);
         }
     }
 }
@@ -585,7 +583,7 @@ input[type="checkbox"]{
     }
 }
 .notification-container{
-    color:white;
+    color:black;
     box-sizing: border-box;
     .notification{
         padding:5px 10px;

@@ -5,17 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use App\Models\Tweet;
-use App\Models\Comment;
-use App\Models\Like;
-use App\Models\Retweet;
 use App\Models\User;
-use App\Models\Bookmark;
-use App\Models\Mention;
 use App\Models\Notification;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Pagination\Paginator;
 
 class NotificationController extends Controller
 {
@@ -26,13 +18,14 @@ class NotificationController extends Controller
     
         if ($type === 'all') {
             // Exclude mentions
-            $query->where('NotificationType', '!=', 'mention');
-        } elseif ($type === 'mentions') {
-            // Filter only mentions
-            $query->where('NotificationType', 'mention');
-        } else {
-            // Handle other types as needed
-        }
+            $query->where('NotificationType');
+        } 
+        // elseif ($type === 'mentions') {
+        //     // Filter only mentions
+        //     $query->where('NotificationType', 'mention');
+        // } else {
+        //     // Handle other types as needed
+        // }
     
         $notifications = $query->get();
     

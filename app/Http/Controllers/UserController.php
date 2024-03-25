@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
@@ -7,7 +8,6 @@ use App\Models\Messages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -354,12 +354,6 @@ class UserController extends Controller
         if (!$message) {
             return response()->json(['message' => 'Message not found'], 404);
         }
-        
-        // Delete associated data like mentions, likes, etc., if applicable
-        // Adjust these based on your message schema
-        // $message->likes()->delete();
-        // $message->mentions()->delete();
-        // ...
 
         $message->delete();
 

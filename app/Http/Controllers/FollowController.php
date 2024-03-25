@@ -3,12 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Carbon\Carbon;
-use App\Models\Follow;
 use App\Models\User;
 use App\Models\Notification;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -92,36 +88,36 @@ class FollowController extends Controller
             return response()->json(['error' => 'User not authenticated.'], 401);
         }
     }
-    public function getAllUsersMention()
-    {
-        if (auth()->check()) {
-            $user1 = auth()->user();
+    // public function getAllUsersMention()
+    // {
+    //     if (auth()->check()) {
+    //         $user1 = auth()->user();
             
-            $Users = User::select('users.*')
-                ->selectSub(function ($query) use ($user1) {
-                    $query->selectRaw('count(*)')
-                        ->from('mentions')
-                        ->whereRaw("mentions.MentionedUserID = users.UserID AND mentions.UserID = $user1->UserID");
-                }, 'mentions_count')
-                ->selectSub(function ($query) use ($user1) {
-                    $query->selectRaw('count(*)')
-                        ->from('follows')
-                        ->whereRaw('(follows.FollowerID = users.UserID OR follows.FollowingID = users.UserID)');
-                }, 'followers_count')
-                ->where('UserID', '!=', $user1->UserID) // Exclude the authenticated user
-                ->orderByDesc(DB::raw("IF((SELECT COUNT(*) FROM follows WHERE (FollowerID = $user1->UserID AND FollowingID = users.UserID) OR (FollowingID = $user1->UserID AND FollowerID = users.UserID)) > 0, 1, 0)")) // Sort by being friends
-                ->get();
+    //         $Users = User::select('users.*')
+    //             ->selectSub(function ($query) use ($user1) {
+    //                 $query->selectRaw('count(*)')
+    //                     ->from('mentions')
+    //                     ->whereRaw("mentions.MentionedUserID = users.UserID AND mentions.UserID = $user1->UserID");
+    //             }, 'mentions_count')
+    //             ->selectSub(function ($query) use ($user1) {
+    //                 $query->selectRaw('count(*)')
+    //                     ->from('follows')
+    //                     ->whereRaw('(follows.FollowerID = users.UserID OR follows.FollowingID = users.UserID)');
+    //             }, 'followers_count')
+    //             ->where('UserID', '!=', $user1->UserID) // Exclude the authenticated user
+    //             ->orderByDesc(DB::raw("IF((SELECT COUNT(*) FROM follows WHERE (FollowerID = $user1->UserID AND FollowingID = users.UserID) OR (FollowingID = $user1->UserID AND FollowerID = users.UserID)) > 0, 1, 0)")) // Sort by being friends
+    //             ->get();
     
-            foreach ($Users as $user2) {
-                $user2->isFollowedByMe = $this->checkIfFollowedByUser($user1, $user2);
-            }
+    //         foreach ($Users as $user2) {
+    //             $user2->isFollowedByMe = $this->checkIfFollowedByUser($user1, $user2);
+    //         }
     
-            return response()->json($Users);
-        } else {
-            // Handle the case where the user is not authenticated.
-            return response()->json(['error' => 'User not authenticated.'], 401);
-        }
-    }
+    //         return response()->json($Users);
+    //     } else {
+    //         // Handle the case where the user is not authenticated.
+    //         return response()->json(['error' => 'User not authenticated.'], 401);
+    //     }
+    // }
     public function getAllUsersExceptMe()
     {
         if (auth()->check()) {
