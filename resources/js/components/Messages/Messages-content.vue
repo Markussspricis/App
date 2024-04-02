@@ -11,17 +11,40 @@
         </div>
         <div class="messages-sub">
             <div class="messages-main">
-                <div class="main-text">Welcome to your inbox!</div>
-                <div class="under-text">Drop a line, share posts and more with private conversations between you and others on X. </div>
-                <button class="write-button" @click="ToggleFirstPopup('EditTrigger')">New message</button>
+                <div class="main-text">Start a new conversation</div>
+                <div class="search-people">
+                    <div class="input-wrap">
+                        <input v-model="searchInput" @input="handleSearchInput" class="Edit-Input" :class="{ 'focused': isInputFocused }" @focus="inputFocus" @blur="inputBlur" placeholder="Search usernames..." />
+                        <ion-icon name="search-outline" class="search-icon"></ion-icon>
+                    </div>
+                    <div class="people-container">
+                        <div class="person" v-for="Person in foundUsers" :key="Person.UserID" @click="Person.personClicked = true; clickedPerson = Person.UserID" :class="{ 'highlighted': Person.UserID === clickedPerson }">
+                            <div class="user-info">
+                                <img :src="'/storage/' + Person.ProfilePicture" class="person-img">
+                                <div class="person-info">
+                                    <p class="username">{{ Person.Name }}</p>
+                                    <p class="usertag">{{ Person.UserTag }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="next-btn" :disabled="!clickedPerson" @click="openConversation(selectedUser)">Start conversation</button>
             </div>
             <div class="messages-right">
-                <div class="right-text">Select a message</div>
-                <div class="right-under-text">Choose from your existing conversations, start a new one, or just keep swimming.</div>
-                <button class="right-write-button" @click="ToggleThirdPopup('MessageTrigger2')">Messages</button>
+                <div class="right-text">Your conversations</div>
+                <div class="conversations">
+                    <div v-for="conversation in conversations" :key="conversation.UserID" class="person-conversation" @click="openConversation(conversation)">
+                        <div>{{ conversation.Name }}</div>
+                    </div>
+                </div>
             </div>
         </div>
-        <Popup v-if="popupTriggers.EditTrigger" :TogglePopup="() => ToggleFirstPopup('EditTrigger')">
+        <Conversation v-if="showConversation" :user="selectedUser" @closeConversation="handleCloseConversation" @messageSent="fetchConversations" />
+    </div>
+</template>
+
+<!-- <Popup v-if="popupTriggers.EditTrigger" :TogglePopup="() => ToggleFirstPopup('EditTrigger')">
             <div class="edit-popup">
                 <p class="title-popup">New message</p>
                 <button class="next-btn" :disabled="!clickedPerson" @click="nextButtonClick">Next</button>
@@ -43,8 +66,8 @@
                     </div>
                 </div>
              </div>
-        </Popup>
-        <Popup v-if="popupTriggers.MessageTrigger" :TogglePopup="() => ToggleSecondPopup('MessageTrigger')">
+        </Popup> -->
+        <!-- <Popup v-if="popupTriggers.MessageTrigger" :TogglePopup="() => ToggleSecondPopup('MessageTrigger')">
             <div class="message-popup" v-if="selectedUser">
                 <div class="title-messages">Write your message to:</div>
                 <div class="top">
@@ -123,18 +146,19 @@
                     <button class="delete-button" @click.stop="deleteMessage(DeleteMessageID)">Delete</button>
                 </div>
             </div>
-        </Popup>
-    </div>
-</template>
+        </Popup> -->
+
 <script>
 import { ref, computed } from 'vue';
-import Popup from '../Popup.vue';
+import Conversation from './Conversation.vue';
+// import Popup from '../Popup.vue';
 import { mapState } from 'vuex';
 import axios from 'axios';
 export default{
     name: 'MessagesContent',
     components: {
-        Popup,
+        // Popup,
+        Conversation,
     },
     data() {
         return {
@@ -142,13 +166,16 @@ export default{
             personClicked: false,
             messageText: '',
             // deleteMessageID: null,
+            showConversation: false,
+            selectedUser: null,
+            conversations: [],
         };
     },
     computed: {
         ...mapState(['user']),
-        isSendDisabled() {
-            return this.messageText.trim().length === 0;
-        },
+        // isSendDisabled() {
+        //     return this.messageText.trim().length === 0;
+        // },
     },
     setup () {
         const DeleteMessageID = ref(null);
@@ -397,6 +424,54 @@ export default{
         }
     },
     methods: {
+        openConversation() {
+            if (!this.selectedUser && this.clickedPerson) {
+                const foundUser = this.foundUsers.find((user) => user.UserID === this.clickedPerson);
+                if (foundUser) {
+                    this.selectedUser = foundUser;
+                    this.showConversation = true;
+                }
+            } else if (this.selectedUser) {
+                this.showConversation = true;
+            }
+        },
+        handleCloseConversation() {
+            this.selectedUser = null;
+            this.showConversation = false;
+        },
+        updateConversationList() {
+    this.fetchConversations()
+        .then(() => {
+            console.log('Conversations:', this.conversations);
+        })
+        .catch(error => {
+            console.error('Error updating conversations:', error);
+        });
+},
+async fetchConversations() {
+    try {
+        const response = await this.$axios.get('/api/user-messages');
+        const { sent_messages, received_messages } = response.data;
+
+        // Assuming currentUser is set elsewhere in your component
+        const currentUserID = this.currentUser ? this.currentUser.UserID : null;
+
+        const allMessages = [...sent_messages, ...received_messages];
+        const conversations = allMessages.reduce((acc, message) => {
+    const otherUserID = message.SenderID === currentUserID ? message.ReceiverID : message.SenderID;
+    const otherUser = message.SenderID === currentUserID ? message.Receiver : message.Sender;
+
+    if (otherUser && !acc.find(user => user.UserID === otherUserID)) {
+        acc.push({ UserID: otherUserID, Name: otherUser.Name || 'Unknown' }); // Use a default value if Name is undefined
+    }
+    return acc;
+}, []);
+
+        this.conversations = conversations;
+    } catch (error) {
+        console.error('Error fetching conversations:', error);
+    }
+},
         onImageChangenav(event) {
             this.messageImagenav = event.target.files[0];
             if (this.messageImagenav) {
@@ -404,26 +479,6 @@ export default{
             } else {
                 this.previewImagenav = null;
             }
-        },
-        autoSize() {
-            const maxRows = 5;
-            const textarea = this.$refs.tweetInputnav;
-            textarea.style.height = 'auto';
-            const customLineHeight = 1;
-            const maxHeight = maxRows * customLineHeight * parseFloat(getComputedStyle(textarea).fontSize);
-
-            if (textarea.scrollHeight <= maxHeight) {
-                textarea.style.height = textarea.scrollHeight + 'px';
-            } else {
-                textarea.style.height = maxHeight + 'px';
-            }
-        },
-        updateMessageText(event) {
-            this.messageText = event.target.value;
-        },
-        handleInput(event) {
-            this.autoSize();
-            this.updateMessageText(event);
         },
         openProfile(tag){
             const NoSymbolTag = tag.replace(/^@/, '');
@@ -504,22 +559,18 @@ export default{
     },
 }
 </script>
+
 <style lang="scss" scoped>
 .messages-container{
     height: 100vh;
     display: flex;
     flex-direction: column;
     border-right: 1px solid #2F3336;
-    // display: grid;
-    // grid-template-columns: 65% 100%;
     .messages-sub{
         display: flex;
         flex-direction: row;
         height: 100vh;
         .messages-main{
-            // padding-top:0px;
-            // height: auto;
-            // padding-bottom:80px;
             width: 40%;
             display:flex;
             flex-direction:column;
@@ -527,39 +578,154 @@ export default{
             border-right: 1px solid #2F3336;
             .main-text{
                 color: black;
-                text-align:left;
-                font-size: 32px;
+                font-size: 28px;
                 font-weight: bold;
                 display: flex;
-                margin-top: 10%;
-                margin-left:6%;
-                margin-right:15.5%;
+                margin-top: 30px;
+                justify-content: center;
             }
-            .under-text{
-                color:gray;
-                display: flex;
-                font-size: 15px;
-                text-align: left;
-                padding-left: 6%;
-                margin-top: 15px;
+            .search-people{
+                padding-top:20px;
+                .input-wrap{
+                    height:60px;
+                    width:100%;
+                    display:flex;
+                    align-items: center;
+                    background-color:rgba($color: white, $alpha: 0.8);
+                    backdrop-filter: blur(5px);
+                    position:sticky;
+                    top:0;
+                    z-index:99;
+                    padding:0 20px;
+                    box-sizing: border-box;
+                    .Edit-Input{
+                        width: 100%;
+                        height: 80%;
+                        border-radius: 50px;
+                        padding-left:60px;
+                        border:  1px solid transparent;
+                        background-color: #e8dddd;
+                        position: relative;
+                        color:black;
+                        font-size: medium;
+                        &.focused {
+                            outline:none;
+                            background-color: white;
+                            border-color: #1da1f2;
+                            box-shadow: 0 0 5px #1da1f2;
+                        }
+                    }
+                    .Edit-Input:focus + .search-icon{
+                        color: #1da1f2;
+                    }
+                    .Edit-Input::-webkit-input-placeholder {
+                        color: #71767B;
+                    }
+                    .search-icon {
+                        position: absolute;
+                        left: 40px;
+                        top: 50%;
+                        transform: translate(0, -50%);
+                        color: #71767B;
+                        font-size: 24px;
+                    }
+                }
+                .people-container{
+                    width:100%;
+                    max-height: 400px;
+                    overflow-y: auto;
+                    display:flex;
+                    flex-direction:column;
+                    box-sizing: border-box;
+                    padding-top: 0px;
+                    padding-bottom: 0px;
+                    &::-webkit-scrollbar{
+                        width:4px;
+                    }
+                    &::-webkit-scrollbar-thumb{
+                        background-color: #2F3336;
+                        border-radius: 5px;;
+                        border:none;
+                    }
+                    &::-webkit-scrollbar-track{
+                        background:none;
+                        border:none;
+                    }
+                    &:disabled{
+                        color:#808080;
+                    }
+                    .person{
+                        width:100%;
+                        height:70px;
+                        display:flex;
+                        flex-direction:row;
+                        align-items: center;
+                        justify-content: space-between;
+                        box-sizing: border-box;
+                        padding: 40px 20px;
+                        cursor:pointer;
+                        transition: all 0.3s;
+                        .user-info{
+                            display:flex;
+                            flex-direction:row;
+                            align-items: center;
+                            justify-content: flex-start;
+                            box-sizing: border-box;
+                            gap:10px;
+                            img{
+                                width:50px;
+                                height:50px;
+                                border-radius:50%;
+                                background-color: rgb(255, 255, 255);
+                            }
+                            .person-info{
+                                display:flex;
+                                flex-direction:column;
+                                align-items: flex-start;
+                                justify-content: flex-start;
+                                gap:5px;
+                                .username{
+                                    color: black;
+                                    font-weight: bold;
+                                    font-size: 16px;
+                                    margin:0;
+                                }
+                                .usertag{
+                                    color: #6e767d;
+                                    font-size: 14px;
+                                    margin: 0;
+                                }
+                            }
+                        }
+                    }
+                    .highlighted {
+                        border: 2px solid #1da1f2;
+                        border-radius: 50px;
+                    }
+                }
             }
-            .write-button{
+            .next-btn{
                 display: block;
                 width: 170px;
-                align-items: center;
                 background:#1da1f2;
+                justify-content: center;
                 color: white;
                 text-align: center;
-                margin-top: 35px;
-                margin-left: 6%;
+                margin: 35px auto 0; 
                 border-radius: 50px;
                 font-size: 16px;
                 font-weight: bold;
                 border: none;
                 height: 50px;
+                cursor: pointer;
                 &:hover{
                     background-color:#2394db;
                 }
+            }
+            .next-btn:disabled {
+                color: gray;
+                background-color: #0e537e;
+                cursor: default;
             }
         }
         .messages-right{
@@ -569,134 +735,15 @@ export default{
             justify-content: center;
             .right-text{
                 color: black;
-                text-align: left;
-                font-size: 32px;
+                font-size: 28px;
                 font-weight: bold;
                 display: flex;
-                justify-content: center;
-                margin-top: 40%;
-                align-items: center;
-            }
-            .right-under-text{
-                color:gray;
-                display: flex;
-                font-size: 15px;
-                text-align: left;
-                padding-right: 20%;
-                padding-left: 29.4%;
-                margin-top: 15px;
+                margin-top: 30px;
                 justify-content: center;
             }
-            .right-write-button{
-                display: block;
-                width: 170px;
-                background:#1da1f2;
-                color: white;
-                text-align: center;
-                margin-top: 35px;
-                margin-left: 29.5%;
-                border-radius: 50px;
-                font-size: 16px;
-                font-weight: bold;
-                border: none;
-                height: 50px;
-                &:hover{
-                    background-color:#2394db;
-                }
-            }
-        }
-    }
-    .edit-popup{
-        width:500px;
-        min-height:550px;
-        display:flex;
-        flex-direction:column;
-        gap:10px;
-        padding:50px 20px 10px 20px;
-        box-sizing: border-box;
-        .title-popup{
-            margin:0;
-            padding:0;
-            font-weight: bold;
-            font-size: 22px;
-            color: black;
-        }
-        .next-btn{
-            position:absolute;
-            top:10px;
-            right:10px;
-            width:auto;
-            height:auto;
-            display:flex;
-            align-items: center;
-            justify-content: center;
-            color:white;
-            border:none;
-            background-color: #1da1f2;
-            border-radius: 50px;
-            font-size: 14px;
-            font-weight: bold;
-            padding:8px 16px;
-            transition: all 0.3s;
-            cursor: pointer;
-            &:hover{
-                background-color: #2394db;
-            }
-        }
-        .next-btn:disabled {
-            color: gray;
-            background-color: #0e537e;
-            cursor: default;
-        }
-        .search-people{
-            padding-top:20px;
-            .input-wrap{
-                height:60px;
+            .conversations{
                 width:100%;
-                display:flex;
-                align-items: center;
-                background-color:rgba($color: white, $alpha: 0.8);
-                backdrop-filter: blur(5px);
-                position:sticky;
-                top:0;
-                z-index:99;
-                padding:0 20px;
-                box-sizing: border-box;
-                .Edit-Input{
-                    width: 100%;
-                    height: 80%;
-                    border-radius: 50px;
-                    padding-left:60px;
-                    border:  1px solid transparent;
-                    background-color: #e8dddd;
-                    position: relative;
-                    color:black;
-                    font-size: medium;
-                    &.focused {
-                        outline:none;
-                        background-color: white;
-                        border-color: #1da1f2;
-                        box-shadow: 0 0 5px #1da1f2;
-                    }
-                }
-                .Edit-Input:focus + .search-icon{
-                    color: #1da1f2;
-                }
-                .Edit-Input::-webkit-input-placeholder {
-                    color: #71767B;
-                }
-                .search-icon {
-                    position: absolute;
-                    left: 40px;
-                    top: 50%;
-                    transform: translate(0, -50%);
-                    color: #71767B;
-                    font-size: 24px;
-                }
-            }
-            .people-container{
-                width:100%;
-                max-height: 400px;
+                max-height: 580px;
                 overflow-y: auto;
                 display:flex;
                 flex-direction:column;
@@ -718,7 +765,7 @@ export default{
                 &:disabled{
                     color:#808080;
                 }
-                .person{
+                .person-conversation{
                     width:100%;
                     height:70px;
                     display:flex;
@@ -729,42 +776,6 @@ export default{
                     padding: 40px 20px;
                     cursor:pointer;
                     transition: all 0.3s;
-                    .user-info{
-                        display:flex;
-                        flex-direction:row;
-                        align-items: center;
-                        justify-content: flex-start;
-                        box-sizing: border-box;
-                        gap:10px;
-                        img{
-                            width:50px;
-                            height:50px;
-                            border-radius:50%;
-                            background-color: rgb(255, 255, 255);
-                        }
-                        .person-info{
-                            display:flex;
-                            flex-direction:column;
-                            align-items: flex-start;
-                            justify-content: flex-start;
-                            gap:5px;
-                            .username{
-                                color: black;
-                                font-weight: bold;
-                                font-size: 16px;
-                                margin:0;
-                            }
-                            .usertag{
-                                color: #6e767d;
-                                font-size: 14px;
-                                margin: 0;
-                            }
-                        }
-                    }
-                }
-                .highlighted {
-                    border: 2px solid #1da1f2;
-                    border-radius: 50px;
                 }
             }
         }
@@ -1155,40 +1166,26 @@ export default{
             flex-direction: column;
             .messages-main{
                 height: 50%;
-                // padding-bottom: 0px;
-                // border-right: 0px;
-                // border-left: 0px;
                 width: 100%;
                 border-bottom:solid 1px #2F3336;
                 border-right: none;
                 .main-text{
-                    margin-left:4%;
+                    margin-top: 5%;
                 }
-                .under-text{
-                    padding-left: 4%;
-                }
-                .write-button{
-                    margin-left: 4%;
+                .search-people{
+                    .people-container{
+                        max-height: 200px;
+                    }
                 }
             }
             .messages-right{
                 height: 50%;
-                // border-right: 0px;
-                // border-left: 0px;
-                // padding-bottom: 0px;
                 width: 100%;
-                justify-content: left;
                 .right-text{
-                    margin-top: 15%;
-                    padding-left: 4%;
-                    justify-content: left;
+                    margin-top: 5%;
                 }
-                .right-under-text{
-                    padding-left: 4%;
-                    justify-content: left;
-                }
-                .right-write-button{
-                    margin-left: 4%;
+                .conversations{
+                    max-height: 380px;
                 }
             }
         }
@@ -1200,61 +1197,22 @@ export default{
             display: flex;
             flex-direction: column;
             .messages-main{
-                height: 50%;
-                width: 100%;
-                // padding-bottom: 0px;
-                // border-right: 0px;
-                // border-left: 0px;
                 .main-text{
                     font-size: 26px;
-                    margin-top: 20%;
-                    // width: 300px;
-                    // margin-left:4%;
                 }
-                .under-text{
-                    font-size: 13px;
-                    // padding-left: 4%;
-                    margin-top: 12px;
-                    // width: 400px;
-                }
-                .write-button{
-                    width: 150px;
-                    margin-top: 30px;
-                    margin-left: 4%;
-                    font-size: 14px;
-                    height: 45px;
+                .search-people{
+                    .people-container{
+                        max-height: 220px;
+                    }
                 }
             }
             .messages-right{
-                height: 50%;
-                width: 100%;
-                // border-right: 0px;
-                // border-left: 0px;
-                // padding-bottom: 0px;
-                // justify-content: left;
                 .right-text{
                     font-size: 26px;
-                    margin-top: 20%;
-                    padding-left: 4%;
-                    // justify-content: left;
-                }
-                .right-under-text{
-                    font-size: 13px;
-                    padding-left: 4%;
-                    padding-right: 4%;
-                    margin-top: 12px;
-                    // justify-content: left;
-                }
-                .right-write-button{
-                    width: 150px;
-                    margin-top: 30px;
-                    margin-left: 4%;
-                    font-size: 14px;
-                    height: 45px;
                 }
             }
         }
-        .edit-popup, .message-popup, .received-messages-popup, .sent-messages-popup{
+        .message-popup, .received-messages-popup, .sent-messages-popup{
             width: 100%;
         }
     }

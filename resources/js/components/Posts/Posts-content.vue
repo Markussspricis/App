@@ -86,7 +86,7 @@
                     </div>
                     <div class="bottom">
                         <div class="buttons">
-                            <button class="tweet-btn"><ion-icon name="happy-outline" class="create-tweet-icon"></ion-icon></button>
+                            <!-- <button class="tweet-btn"><ion-icon name="happy-outline" class="create-tweet-icon"></ion-icon></button> -->
                             <!-- <button class="tweet-btn" @click.stop="TogglePopup('MentionTrigger', 'main')"><ion-icon name="at-sharp" class="create-tweet-icon"></ion-icon></button> -->
                         </div>
                         <button class="post-button" @click="createComment(tweet.TweetID, main_comment_text_input, mainInput)" :disabled="buttonDisabled || !main_comment_text_input">Reply</button>
@@ -134,10 +134,10 @@
 
             <div class="bottom">
                 <div class="buttons">
-                    <button class="tweet-btn"><ion-icon name="happy-outline" class="create-tweet-icon"></ion-icon></button>
+                    <!-- <button class="tweet-btn"><ion-icon name="happy-outline" class="create-tweet-icon"></ion-icon></button> -->
                     <!-- <button class="tweet-btn" @click.stop="TogglePopup('MentionTrigger', 'popup')"><ion-icon name="at-sharp" class="create-tweet-icon"></ion-icon></button> -->
                 </div>
-                <button class="popup-button" @click="createComment(tweetIdInPopup, popup_comment_text_input, popupInput)" :disabled="buttonDisabled">Comment</button>
+                <button class="popup-button" @click="createComment(tweetIdInPopup, popup_comment_text_input, popupInput)" :disabled="buttonDisabled || !popup_comment_text_input">Comment</button>
             </div>
         </div>
     </Popup>
@@ -151,7 +151,7 @@
             </div>
         </div>
     </Popup>
-    <Popup v-if="popupTriggers.MentionTrigger" :TogglePopup="() => TogglePopup('MentionTrigger')">
+    <!-- <Popup v-if="popupTriggers.MentionTrigger" :TogglePopup="() => TogglePopup('MentionTrigger')">
         <div class="mention-popup">
             <p class="title">Mention</p>
             <div class="search-input-container">
@@ -187,7 +187,7 @@
                 </div>
             </div>
         </div>
-    </Popup>
+    </Popup> -->
 </template>
 <script>
 import { ref } from 'vue';

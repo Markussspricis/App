@@ -9,6 +9,7 @@ use App\Http\Controllers\RetweetController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\MessageController;
 
 Route::middleware('auth:sanctum')->get('user', [UserController::class, 'getUser']);
 Route::post('login', [UserController::class, 'login']);
@@ -23,10 +24,12 @@ Route::post('updatePFP', [UserController::class, 'updateProfilePicture']);
 Route::post('updateBanner', [UserController::class, 'updateBanner']);
 Route::middleware('auth:sanctum')->post('/update-profile', [UserController::class, 'updateProfile']);
 Route::middleware('auth:sanctum')->get('/get-user-tag/{tag}', [UserController::class, 'getUserByTag']);
-Route::middleware('auth:sanctum')->post('/send-message', [UserController::class, 'sendMessage']);
-Route::middleware('auth:sanctum')->get('/user-messages', [UserController::class, 'getUserMessages']);
 Route::middleware('auth:sanctum')->get('/update-follower-count/{userID}', [UserController::class, 'updateFollowerCount']);
-Route::delete('/messages/{id}', [UserController::class, 'deleteMessage']);
+
+Route::middleware('auth:sanctum')->post('/send-message', [MessageController::class, 'sendMessage']);
+Route::middleware('auth:sanctum')->get('/user-messages/{userID}', [MessageController::class, 'getUserMessages']);
+Route::delete('/messages/{id}', [MessageController::class, 'deleteMessage']);
+Route::middleware('auth:sanctum')->get('/conversations/{user}', [MessageController::class, 'getConversation']);
 
 Route::middleware('auth:sanctum')->post('tweets', [TweetController::class, 'createTweet']);
 Route::middleware('auth:sanctum')->get('/tweet_type/{type}/{page}', [TweetController::class, 'getTweets']);

@@ -160,10 +160,10 @@
 
                 <div class="bottom">
                     <div class="buttons">
-                        <button class="tweet-btn"><ion-icon name="happy-outline" class="create-tweet-icon"></ion-icon></button>
-                        <button class="tweet-btn" @click.stop="TogglePopup('MentionTrigger')"><ion-icon name="at-sharp" class="create-tweet-icon"></ion-icon></button>
+                        <!-- <button class="tweet-btn"><ion-icon name="happy-outline" class="create-tweet-icon"></ion-icon></button>
+                        <button class="tweet-btn" @click.stop="TogglePopup('MentionTrigger')"><ion-icon name="at-sharp" class="create-tweet-icon"></ion-icon></button> -->
                     </div>
-                    <button class="popup-button" @click="createComment(tweetIdInPopup, comment_text_input)" :disabled="buttonDisabled">Comment</button><!-- Izdomā kā comment poga nodos tweetID. -->
+                    <button class="popup-button" @click="createComment(tweetIdInPopup, comment_text_input)" :disabled="buttonDisabled || !comment_text_input">Comment</button><!-- Izdomā kā comment poga nodos tweetID. -->
                 </div>
             </div>
         </Popup>
@@ -268,7 +268,7 @@
                 </div>
             </div>
         </Popup>
-        <Popup v-if="popupTriggers.MentionTrigger" :TogglePopup="() => TogglePopup('MentionTrigger')">
+        <!-- <Popup v-if="popupTriggers.MentionTrigger" :TogglePopup="() => TogglePopup('MentionTrigger')">
             <div class="mention-popup">
                 <p class="title">Mention</p>
                 <div class="search-input-container">
@@ -304,7 +304,7 @@
                     </div>
                 </div>
             </div>
-        </Popup>
+        </Popup> -->
     </div>
 </template>
 <script>

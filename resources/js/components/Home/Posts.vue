@@ -36,7 +36,7 @@
                     <div class="bottom">
                         <div class="buttons">
                             <button class="tweet-btn"><input type="file" accept="image/png, image/gif, image/jpeg, video/mp4,video/x-m4v,video/*" id="tweet-img-input" @change="onImageChange" hidden><label for="tweet-img-input" class="tweet-img-label"><ion-icon name="images-outline" class="create-tweet-icon"></ion-icon></label></button>
-                            <button class="tweet-btn"><ion-icon name="happy-outline" class="create-tweet-icon"></ion-icon></button>
+                            <!-- <button class="tweet-btn"><ion-icon name="happy-outline" class="create-tweet-icon"></ion-icon></button> -->
                             <!-- <button class="tweet-btn" @click.stop="TogglePopup('MentionTrigger', 'tweet')"><ion-icon name="at-sharp" class="create-tweet-icon"></ion-icon></button> -->
                         </div>
                         <button class="post-button" @click="createTweet" :disabled="buttonDisabled || tweet_text_input === '' && !tweetImage">Post</button>
@@ -130,7 +130,7 @@
 
             <div class="bottom">
                 <div class="buttons">
-                    <button class="tweet-btn"><ion-icon name="happy-outline" class="create-tweet-icon"></ion-icon></button>
+                    <!-- <button class="tweet-btn"><ion-icon name="happy-outline" class="create-tweet-icon"></ion-icon></button> -->
                     <!-- <button class="tweet-btn" @click.stop="TogglePopup('MentionTrigger', 'comment')"><ion-icon name="at-sharp" class="create-tweet-icon"></ion-icon></button> -->
                 </div>
                 <button class="popup-button" @click="createComment(tweetIdInPopup, comment_text_input)" :disabled="buttonDisabled || !comment_text_input">Comment</button><!-- Izdomā kā comment poga nodos tweetID. -->
