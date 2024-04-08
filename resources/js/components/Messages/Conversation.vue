@@ -1,5 +1,5 @@
 <template>
-  <div class="conversation-overlay">
+  <!-- <div class="conversation-overlay"> -->
     <div class="conversation">
       <div class="top-bar">
         <button class="close" @click="closeConversation">
@@ -15,18 +15,20 @@
       </div>
 
       <div class="messages">
-        <div v-for="(message, index) in messages" :key="index" class="message">
-          <div v-if="message.SenderID === loggedInUserID" class="sent">
+        <div v-for="(message, index) in conversationMessages" :key="index" class="message">
+          <div v-if="message.type === 'sent'" class="sent">
             <div class="content">{{ message.Content }}</div>
-            <div class="time">{{ message.sent_ago }}</div>
             <div class="image">
               <img v-if="message.Image" :src="'/storage/' + message.Image" alt="Sent Image">
             </div>
+            <span class="time">{{ message.time_ago }}</span>
           </div>
           <div v-else class="received">
-            <p>{{ message.Content }}</p>
-            <div class="time">{{ message.received_ago }}</div>
-            <img v-if="message.Image" :src="'/storage/' + message.Image" alt="Received Image">
+            <div class="content">{{ message.Content }}</div>
+            <div class="image">
+              <img v-if="message.Image" :src="'/storage/' + message.Image" alt="Received Image">
+            </div>
+            <div class="time">{{ message.time_ago }}</div>
           </div>
         </div>
       </div>
@@ -45,15 +47,15 @@
         </div>
         <div class="buttons">
           <button class="message-btn"><input type="file" accept="image/png, image/gif, image/jpeg, video/mp4,video/x-m4v,video/*" id="message-img-input" @change="onImageChangenav" hidden><label for="message-img-input" class="message-img-label"><ion-icon name="images-outline" class="create-message-icon"></ion-icon></label></button>
-          <button class="popup-button" @click="sendMessage" :disabled="isSendDisabled">Send</button>
+          <button class="popup-button" @click="sendMessageToStore" :disabled="isSendDisabled">Send</button>
         </div>
       </div>
     </div>
-  </div>
+  <!-- </div> -->
 </template>
   
 <script>
-  import axios from 'axios';
+  import { mapState, mapActions } from 'vuex';
   export default {
     name: 'Conversation',
     data(){
@@ -64,66 +66,71 @@
         // receivedMessages: [],
         // sentMessages: [],
         messages: [],
-        loggedInUserID: null
+        loggedInUserID: null,
+        isSendDisabled: true
       }
     },
     props: {
       user: Object,
     },
+    computed: {
+  conversationMessages: function() {
+    const conversation = this.$store.state.conversations.find(conv => conv.UserID === this.user.UserID);
+    console.log('Conversation:', conversation);
+    return conversation ? conversation.messages : [];
+  }
+},
     methods: {
-      async sendMessage() {
-  if (!this.user || !this.messageText.trim()) return;
-
-  const formData = new FormData();
-  formData.append('ReceiverID', this.user.UserID);
-  formData.append('Content', this.messageText.trim());
-  if (this.messageImagenav) {
-    formData.append('image', this.messageImagenav);
+      ...mapActions(['sendMessage']),
+      sendMessageToStore() {
+  const ReceiverID = this.user.UserID;
+  console.log('ReceiverID:', ReceiverID);
+  if (!this.user || !this.messageText.trim()) {
+    console.log('User or message text is undefined');
+    return;
   }
 
-  try {
-    const response = await this.$axios.post('/api/send-message', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+  // Define messageData object
+  const messageData = {
+    ReceiverID: this.user.UserID,
+    Content: this.messageText.trim(),
+    Image: this.messageImagenav // Assuming this is a File object
+  };
+
+  // Log messageData after defining it
+  console.log(messageData);
+
+  // Dispatch sendMessage action from Vuex store with messageData
+  this.sendMessage(messageData)
+    .then(() => {
+      // Clear message input and image preview
+      this.messageText = '';
+      this.messageImagenav = null;
+    })
+    .catch(error => {
+      console.error('Error sending message:', error);
     });
-
-    const sentMessage = response.data;
-    this.messages.push(sentMessage); // Add sent message to messages array immediately
-
-    // Clear message input and image preview
-    this.messageText = '';
-    this.messageImagenav = null;
-
-    // Fetch messages again to update the conversation
-    this.fetchMessages();
-  } catch (error) {
-    console.error('Error sending message:', error);
-  }
 },
+// async fetchMessages() {
+//     try {
+//         const response = await this.$axios.get(`/api/user-messages/${this.user.UserID}`);
+//         const { messages } = response.data;
+
+//         // Set the messages for the conversation
+//         this.messages = messages;
+//     } catch (error) {
+//         console.error('Error fetching messages:', error);
+//     }
+// },
 async fetchMessages() {
-  try {
-    const response = await this.$axios.get(`/api/user-messages/${this.user.UserID}`);
-    const { sent_messages, received_messages } = response.data;
-
-    this.messages = [...sent_messages, ...received_messages];
-
-    this.messages.forEach(message => {
-      if (message.SenderID === this.loggedInUserID) {
-        message.sent_ago = message.sent_ago;
-      } 
-      if (!message.received_ago) {
-        message.received_ago = message.sent_ago;
-      }
-    });
-  } catch (error) {
-    console.error('Error fetching messages:', error);
-  }
+    try {
+        await this.$store.dispatch('fetchMessages', this.user.UserID);
+        // Fetched messages will be updated in Vuex store state
+    } catch (error) {
+        console.error('Error fetching messages:', error);
+    }
 },
 
-    closeConversation() {
-      this.$emit('closeConversation');
-    },
       closeConversation() {
         this.$emit('closeConversation');
       },
@@ -154,6 +161,7 @@ async fetchMessages() {
       handleInput(event) {
         this.autoSize();
         this.updateMessageText(event);
+        this.isSendDisabled = !this.messageText.trim();
       },
       removeImage(){
         // this.tweetImage = null;
@@ -162,42 +170,62 @@ async fetchMessages() {
     },
     mounted() {
     // Fetch initial data when component is mounted
+    console.log('User:', this.user);
     this.fetchMessages();
   },
   };
 </script>
   
 <style lang="scss" scoped>
-  .conversation-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 999;
+  // .conversation-overlay {
+  //   position: fixed;
+  //   top: 0;
+  //   left: 0;
+  //   width: 100%;
+  //   height: 100%;
+  //   background-color: rgba(0, 0, 0, 0.5);
+  //   z-index: 999;
     .conversation {
-      position: relative;
-      background-color: white;
-      margin: auto;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 99;
-      width: 600px;
-      height: 400px;
+      // position: relative;
+      // background-color: white;
+      // margin: auto;
+      // top: 50%;
+      // transform: translateY(-50%);
+      // z-index: 99;
+      // width: 600px;
+      // height: 400px;
+      // display: flex;
+      // flex-direction: column;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      //background-color: pink;
+      z-index: 999; /* Ensure it's above other content */
       display: flex;
       flex-direction: column;
+      background-color:rgba($color: white, $alpha: 1);
       .top-bar{
-        height:15%;
-        width:100%;
-        background-color:rgba($color: white, $alpha: 0.8);
-        border-bottom:solid 1px #2F3336;
-        position:sticky;
-        top:0;
-        z-index:9;
+        // height:15%;
+        // width:100%;
+        //background-color:rgba($color: white, $alpha: 1);
+        // border-bottom:solid 1px #2F3336;
+        // position:fixed;
+        // top:0;
+        // z-index:9;
+        // display: flex;
+        // flex-direction: row;
+        // align-items: center;
+        height: 60px;
+        width: 100%;
+        //background-color: rgba($color: white, $alpha: 0.8);
+        border-bottom: solid 1px #2F3336;
+        position: relative;
         display: flex;
         flex-direction: row;
         align-items: center;
+        //z-index: 9;
         .close{
           display:flex;
           align-items: center;
@@ -264,11 +292,16 @@ async fetchMessages() {
         }
       }
       .messages{
-        // background-color: lightblue;
-        height: 73%;
+        //background-color: lightblue;
+        height: 83%;
+        width: 100%;
         display: flex;
         flex-direction: column;
         overflow-y: auto;
+        //z-index: 9;
+        // position: fixed;
+        //top: 15%;
+        //background-color:rgba($color: white, $alpha: 1);
         &::-webkit-scrollbar{
           width:4px;
         }
@@ -286,50 +319,103 @@ async fetchMessages() {
         }
         .message{
           // background-color: red;
-          height: auto;
-          display: flex;
-          flex-direction: column;
+          //height: auto;
+          //width: 100%;
+          //display: flex;
+          //flex-direction: row;
+          padding: 5px 10px 5px 10px;
           .sent{
             // background-color: red;
+            //width:600px;
             width: 100%;
+            height: auto;
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
+            overflow-wrap: anywhere;
+            // justify-content: center;
+            // align-items: center;
+            //padding-left: 5px;
             .content{
-              color: red !important;
+              color: red;
+              // display: flex;
+              // justify-content: flex-start;
             }
             .time{
-              color: red;
+              color: gray;
+              // display: flex;
+              // justify-content: flex-start;
             }
             .image{
               img{
-                max-width: 50px;
-                max-height: 40px;
+                max-width: 100%;
+                max-height: 100%;
+                border-radius: 15px;
+              }
+            }
+          }
+          .received{
+            // background-color: red;
+            width: 100%;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            overflow-wrap: anywhere;
+            justify-content: flex-end;
+            // word-break: break-all;
+            .content{
+              color: green;
+              // display: flex;
+              // justify-content: flex-start;
+            }
+            .time{
+              color: gray;
+              // display: flex;
+              // justify-content: flex-start;
+            }
+            .image{
+              img{
+                max-width: 100%;
+                max-height: 100%;
+                border-radius: 15px;
               }
             }
           }
         }
       }
       .bottom{
-        width:100%;
-        min-height: 12%;
-        display:flex;
+        // width:100%;
+        // min-height: 15%;
+        // display:flex;
+        // flex-direction: row;
+        // border-top:1px solid #2F3336;
+        // bottom: 0;
+        // position: fixed;
+        width: 100%;
+        min-height: 60px;
+        display: flex;
         flex-direction: row;
-        border-top:1px solid #2F3336;
+        //border-top: 1px solid #2F3336;
         bottom: 0;
         position: absolute;
+        background-color:rgba($color: white, $alpha: 1);
+        //background-color: blue;
+        //z-index: 99;
         .message-input-container{
-          width:80%;
-          height:100%;
+          width:85%;
+          //height:100%;
           display:flex;
           align-items: center;
           justify-content: center;
           padding-right:10px;
+          border-top: 1px solid #2F3336;
+          //background-color: yellow;
           .message-input{
             width:100%;
-            height:70%;
+            //height:100%;
+            margin-right: 0px;
             padding-left: 10px;
             display: flex;
-            align-items: center;
+            //align-items: center;
             color:black;
             resize: none;
             transition: height 0.2s;
@@ -337,7 +423,12 @@ async fetchMessages() {
             font-size: 22px;
             border:none;
             display:flex;
-            align-items: center;
+            //align-items: center;
+            //background-color: green;
+            // ::placeholder{
+            //   display: flex;
+            //   align-items: center;
+            // }
             &::-webkit-scrollbar{
               width:4px;
             }
@@ -357,17 +448,20 @@ async fetchMessages() {
         }
         .message-image-preview{
           padding-top: 10px;
+          position: relative;
+          border-top: 1px solid #2F3336;
           img{
-            max-width:100%;
-            max-height:100%;
+            width:150px;
+            height:100px;
             border-radius: 15px;
           }
           .preview-cover{
             display:none;
-            width:100%;
-            height:100% ;
+            top: 10px;
+            left: 0;
+            width: 100%;
+            height: 90%;
             position:absolute;
-            top:-2.5px;
             z-index:99;
             background-color: rgba($color: #000000, $alpha: 0.1);
             backdrop-filter: blur(2px);
@@ -402,8 +496,9 @@ async fetchMessages() {
           display:flex;
           flex-direction: row;
           align-items: center;
-          width: 20%;
+          width: 15%;
           justify-content: space-around;
+          border-top: 1px solid #2F3336;
           .message-btn{
             height:40px;
             width:40px;
@@ -414,7 +509,6 @@ async fetchMessages() {
             justify-content: center;
             align-items: center;
             padding:0;
-            cursor:pointer;
             transition: all 0.3s;
             .message-img-label{
               width:100%;
@@ -424,6 +518,7 @@ async fetchMessages() {
               align-items: center;
               margin: 0;
               padding: 0;
+              cursor:pointer;
             }
             .create-message-icon{
               font-size:20px;
@@ -463,10 +558,72 @@ async fetchMessages() {
         }
       }
     }
-  }
-  @media(max-width: 768px){
+  //}
+  // @media(max-width: 768px){
+  //   .conversation{
+  //     max-width: 100%;
+  //   }
+  // }
+  @media(max-width: 1250px){
     .conversation{
-      max-width: 90%;
+      // .top-bar{
+      //   height: 8%;
+      // }
+      .messages{
+        height: 84%;
+      }
+      // .bottom{
+      //   min-height: 8%;
+      // }
+    }
+  }
+  @media(max-width: 1000px){
+    .conversation{
+      // .top-bar{
+      //   height: 7%;
+      // }
+      .messages{
+        height: 86%;
+      }
+      // .bottom{
+      //   min-height: 7%;
+      // }
+    }
+  }
+  @media(max-width: 850px){
+    .conversation{
+      .bottom{
+        .message-input-container{
+          width: 80%;
+        }
+        .buttons{
+          width: 20%;
+        }
+      }
+    }
+  }
+  @media(max-width: 650px){
+    .conversation{
+      // .top-bar{
+      //   height: 60px;
+      // }
+      .messages{
+        height: 88%;
+      }
+      .bottom{
+        // min-height: 6%;
+        .message-input-container{
+          width: 75%;
+        }
+        .buttons{
+          width: 25%;
+        }
+      }
+    }
+  }
+  @media(max-width: 500px){
+    .conversation{
+      height: 95%;
     }
   }
 </style>

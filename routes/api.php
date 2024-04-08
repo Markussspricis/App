@@ -29,7 +29,7 @@ Route::middleware('auth:sanctum')->get('/update-follower-count/{userID}', [UserC
 Route::middleware('auth:sanctum')->post('/send-message', [MessageController::class, 'sendMessage']);
 Route::middleware('auth:sanctum')->get('/user-messages/{userID}', [MessageController::class, 'getUserMessages']);
 Route::delete('/messages/{id}', [MessageController::class, 'deleteMessage']);
-Route::middleware('auth:sanctum')->get('/conversations/{user}', [MessageController::class, 'getConversation']);
+Route::middleware('auth:sanctum')->get('/conversations', [MessageController::class, 'getConversations']);
 
 Route::middleware('auth:sanctum')->post('tweets', [TweetController::class, 'createTweet']);
 Route::middleware('auth:sanctum')->get('/tweet_type/{type}/{page}', [TweetController::class, 'getTweets']);

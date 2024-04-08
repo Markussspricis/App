@@ -20,6 +20,7 @@ return new class extends Migration
             $table->timestamps();
             $table->foreign('SenderID')->references('UserID')->on('users');
             $table->foreign('ReceiverID')->references('UserID')->on('users');
+            $table->foreign('ConversationID')->references('ConversationID')->on('conversations');
         });
     }
 

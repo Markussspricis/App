@@ -13,7 +13,7 @@ class Messages extends Model
 
     protected $primaryKey = 'MessageID'; // Set the primary key field
 
-    protected $fillable = ['SenderID', 'ReceiverID', 'Content', 'Image']; // Define the fields that can be mass-assigned
+    protected $fillable = ['SenderID', 'ReceiverID', 'Content', 'Image', 'ConversationID']; // Define the fields that can be mass-assigned
 
     public function sender()
     {
@@ -23,5 +23,10 @@ class Messages extends Model
     public function receiver()
     {
         return $this->belongsTo(User::class, 'ReceiverID'); // Define the relationship with the User model for the receiver
+    }
+
+    public function conversation()
+    {
+        return $this->belongsTo(Conversation::class, 'ConversationID'); // Define the relationship with the Conversation model for the conversation
     }
 }
