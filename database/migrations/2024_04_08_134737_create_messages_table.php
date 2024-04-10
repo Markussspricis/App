@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('MessageID');
             $table->unsignedBigInteger('SenderID');
             $table->unsignedBigInteger('ReceiverID');
+            $table->unsignedBigInteger('ConversationID');
             $table->text('Content');
             $table->string('Image')->nullable();
             $table->timestamps();

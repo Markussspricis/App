@@ -72,64 +72,68 @@
     },
     props: {
       user: Object,
+      conversationId: String,
     },
     computed: {
-  conversationMessages: function() {
-    const conversation = this.$store.state.conversations.find(conv => conv.UserID === this.user.UserID);
-    console.log('Conversation:', conversation);
-    return conversation ? conversation.messages : [];
-  }
-},
+      ...mapState(['conversations']),
+        conversationMessages() {
+          // Retrieve messages for the current conversation from Vuex state
+          const conversation = this.conversations.find(conv => conv.ConversationID === this.conversationId);
+          return conversation && conversation.messages ? conversation.messages : [];
+        },
+    },
     methods: {
-      ...mapActions(['sendMessage']),
-      sendMessageToStore() {
-  const ReceiverID = this.user.UserID;
-  console.log('ReceiverID:', ReceiverID);
-  if (!this.user || !this.messageText.trim()) {
-    console.log('User or message text is undefined');
-    return;
-  }
+      ...mapActions(['sendMessage', 'fetchConversation', 'fetchMessages']),
+      async sendMessageToStore() {
+      try {
+        console.log('Sending message...');
+        await this.fetchConversation(this.user.UserID); // Fetch conversation
+        
+        const ReceiverID = this.user.UserID;
+        if (!this.user || !this.messageText.trim()) {
+          console.log('User or message text is undefined');
+          return;
+        }
 
-  // Define messageData object
-  const messageData = {
-    ReceiverID: this.user.UserID,
-    Content: this.messageText.trim(),
-    Image: this.messageImagenav // Assuming this is a File object
-  };
+        const messageData = {
+          ReceiverID: ReceiverID,
+          Content: this.messageText.trim(),
+          Image: this.messageImagenav
+        };
 
-  // Log messageData after defining it
-  console.log(messageData);
+        await this.sendMessage(messageData);
 
-  // Dispatch sendMessage action from Vuex store with messageData
-  this.sendMessage(messageData)
-    .then(() => {
-      // Clear message input and image preview
-      this.messageText = '';
-      this.messageImagenav = null;
-    })
-    .catch(error => {
-      console.error('Error sending message:', error);
-    });
-},
-// async fetchMessages() {
-//     try {
-//         const response = await this.$axios.get(`/api/user-messages/${this.user.UserID}`);
-//         const { messages } = response.data;
-
-//         // Set the messages for the conversation
-//         this.messages = messages;
-//     } catch (error) {
-//         console.error('Error fetching messages:', error);
-//     }
-// },
-async fetchMessages() {
-    try {
-        await this.$store.dispatch('fetchMessages', this.user.UserID);
-        // Fetched messages will be updated in Vuex store state
-    } catch (error) {
-        console.error('Error fetching messages:', error);
-    }
-},
+        this.messageText = '';
+        this.messageImagenav = null;
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    },
+    async fetchInitialData() {
+      try {
+        console.log('Fetching initial data...');
+        await this.fetchConversation(this.conversationId);
+        await this.fetchMessages(this.conversationId);
+      } catch (error) {
+        console.error('Error fetching initial data:', error);
+      }
+    },
+    // async fetchMessages() {
+    //   try {
+    //     // Pass the conversationId to fetchMessages
+    //     await this.fetchMessages(this.conversationId); 
+    //   } catch (error) {
+    //     console.error('Error fetching messages:', error);
+    //   }
+    // },
+    // async fetchConversation() {
+    //   try {
+    //     await this.$store.dispatch('fetchConversation', this.conversationId);
+    //   } catch (error) {
+    //     console.error('Error fetching conversation:', error);
+    //     throw error;
+    //   }
+    // },
 
       closeConversation() {
         this.$emit('closeConversation');
@@ -170,9 +174,12 @@ async fetchMessages() {
     },
     mounted() {
     // Fetch initial data when component is mounted
+    console.log('Component mounted');
     console.log('User:', this.user);
-    this.fetchMessages();
-  },
+    // this.fetchMessages(this.conversationId); 
+    // this.fetchConversation(this.conversationId); 
+    this.fetchInitialData();
+},
   };
 </script>
   

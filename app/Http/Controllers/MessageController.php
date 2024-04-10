@@ -17,19 +17,7 @@ class MessageController extends Controller
     {
         $user = Auth::user();
 
-        $message = new Messages();
-        $message->SenderID = $user->UserID;
-        $message->ReceiverID = $request->input('ReceiverID');
-        $message->Content = $request->input('Content');
-
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $path = $image->store('tweet_pictures', 'public');
-            $message->Image = $path;
-        }
-
-        $message->save();
-
+        // Fetch or create the conversation
         $conversation = Conversation::where(function ($query) use ($user, $request) {
             $query->where('user1_id', $user->UserID)
                 ->where('user2_id', $request->input('ReceiverID'));
@@ -37,14 +25,33 @@ class MessageController extends Controller
             $query->where('user1_id', $request->input('ReceiverID'))
                 ->where('user2_id', $user->UserID);
         })->first();
-    
+
+        // Ensure conversation exists
         if (!$conversation) {
-            // Create a new conversation
+            // Create a new conversation if it doesn't exist
             $conversation = new Conversation();
             $conversation->user1_id = $user->UserID;
             $conversation->user2_id = $request->input('ReceiverID');
             $conversation->save();
-        }    
+        }
+
+        // Create a new message
+        $message = new Messages();
+        $message->SenderID = $user->UserID;
+        $message->ReceiverID = $request->input('ReceiverID');
+        $message->Content = $request->input('Content');
+
+        // Assign the conversation ID to the message
+        $message->ConversationID = $conversation->ConversationID;
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $path = $image->store('tweet_pictures', 'public');
+            $message->Image = $path;
+        }
+
+        // Save the message to the database
+        $message->save();
 
         return response()->json(['success' => true, 'message' => 'Message sent successfully']);
     }
@@ -67,41 +74,30 @@ class MessageController extends Controller
             return $diff->s . 's';
         }
     }
-
-    public function getUserMessages($userID)
+    public function getConversationMessages($conversationID)
     {
-        // Fetch user based on the provided user ID
-        $user = User::find($userID);
+        try {
+            // Fetch messages based on the provided conversation ID
+            $messages = Messages::where('ConversationID', $conversationID)->with(['sender', 'receiver'])->get();
 
-        if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
+            // Check if any messages are found
+            if ($messages->isEmpty()) {
+                return response()->json(['error' => 'No messages found for the provided conversation ID'], 404);
+            }
+
+            // Augment each message with additional properties
+            foreach ($messages as $message) {
+                $message->time_ago = $this->formatTimeAgo($message->created_at, Carbon::now());
+                $message->type = ($message->sender_id == auth()->id()) ? 'sent' : 'received'; // Assuming authenticated user ID is used for comparison
+            }
+
+            // Sort the messages by created_at timestamp
+            $messages = $messages->sortBy('created_at')->values()->all();
+
+            return response()->json(['conversationId' => $conversationID, 'messages' => $messages]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error fetching messages: ' . $e->getMessage()], 500);
         }
-
-        // Fetch sent and received messages for the specified user
-        $sentMessages = $user->messagesSent()->with('receiver')->get();
-        $receivedMessages = $user->messagesReceived()->with('sender')->get();
-
-        // Merge sent and received messages into a single array
-        $messages = [];
-
-        foreach ($sentMessages as $message) {
-            $message->time_ago = $this->formatTimeAgo($message->created_at, Carbon::now());
-            $message->type = 'sent';
-            $messages[] = $message;
-        }
-
-        foreach ($receivedMessages as $message) {
-            $message->time_ago = $this->formatTimeAgo($message->created_at, Carbon::now());
-            $message->type = 'received';
-            $messages[] = $message;
-        }
-
-        // Sort the messages by created_at timestamp
-        usort($messages, function ($a, $b) {
-            return $a->created_at <=> $b->created_at;
-        });
-
-        return response()->json(['messages' => $messages]);
     }
 
     public function deleteMessage($id)
@@ -117,49 +113,31 @@ class MessageController extends Controller
         return response()->json(['message' => 'Message deleted successfully']);
     }
 
-    // public function getConversation(Request $request, User $user)
-    // {
-    //     $authUser = Auth::user();
-
-    //     // Fetch messages exchanged between authenticated user and the specified user
-    //     $messages = Messages::where(function ($query) use ($authUser, $user) {
-    //         $query->where('SenderID', $authUser->id)
-    //             ->where('ReceiverID', $user->id);
-    //     })->orWhere(function ($query) use ($authUser, $user) {
-    //         $query->where('SenderID', $user->id)
-    //             ->where('ReceiverID', $authUser->id);
-    //     })->orderBy('created_at', 'asc')->get();
-
-    //     return response()->json(['user' => $user, 'messages' => $messages]);
-    // }
-    public function getConversations(Request $request)
+    public function getConversation(Request $request, $userId)
     {
-        $authUser = Auth::user();
+        $authUserId = Auth::id();
+        // Check if a conversation exists between the authenticated user and the specified user
+        $conversation = Conversation::where(function ($query) use ($authUserId, $userId) {
+            $query->where('user1_id', $authUserId)
+                ->where('user2_id', $userId);
+        })->orWhere(function ($query) use ($authUserId, $userId) {
+            $query->where('user1_id', $userId)
+                ->where('user2_id', $authUserId);
+        })->first();
 
-        // Fetch all unique users with whom the authenticated user has exchanged messages
-        $conversations = DB::table('messages')
-            ->select('ReceiverID as UserID')
-            ->where('SenderID', $authUser->UserID)
-            ->union(DB::table('messages')
-                ->select('SenderID as UserID')
-                ->where('ReceiverID', $authUser->UserID))
-            ->distinct()
-            ->get();
+        return response()->json(['conversation' => $conversation]); // Return conversation directly
+    }
 
-        // Retrieve additional user information for each conversation
-        $conversationsWithUserInfo = [];
-        foreach ($conversations as $conversation) {
-            $user = User::find($conversation->UserID);
-            if ($user) {
-                $conversationsWithUserInfo[] = [
-                    'UserID' => $user->UserID,
-                    'Name' => $user->Name,
-                    'UserTag' => $user->UserTag,
-                    'ProfilePicture' => $user->ProfilePicture,
-                ];
-            }
-        }
+    public function createConversation(Request $request)
+    {
+        $authUserId = Auth::id();
+        $userId = $request->input('userId');
+        // Create a new conversation
+        $conversation = new Conversation();
+        $conversation->user1_id = $authUserId;
+        $conversation->user2_id = $userId;
+        $conversation->save();
 
-        return response()->json(['conversations' => $conversationsWithUserInfo]);
+        return response()->json(['conversation' => $conversation]);
     }
 }

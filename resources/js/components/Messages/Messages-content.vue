@@ -103,20 +103,45 @@ export default{
         }
     },
     methods: {
-        openConversation(conversationId) {
+    //     openConversation(conversationId) {
+    //   if (!this.selectedUser && this.clickedPerson) {
+    //     const foundUser = this.foundUsers.find((user) => user.UserID === this.clickedPerson);
+    //     if (foundUser) {
+    //       this.selectedUser = foundUser;
+    //       this.showConversation = true;
+    //       if (!this.conversations.includes(foundUser.UserID)) {
+    //         this.conversations.push(foundUser.UserID);
+    //       }
+    //     }
+    //   } else if (this.selectedUser) {
+    //     this.showConversation = true;
+    //   }
+    // },
+    openConversation() {
       if (!this.selectedUser && this.clickedPerson) {
-        const foundUser = this.foundUsers.find((user) => user.UserID === this.clickedPerson);
+        const foundUser = this.foundUsers.find(user => user.UserID === this.clickedPerson);
         if (foundUser) {
           this.selectedUser = foundUser;
-          this.showConversation = true;
-          if (!this.conversations.includes(foundUser.UserID)) {
-            this.conversations.push(foundUser.UserID);
-          }
+          this.ensureConversationExists(foundUser.UserID);
         }
       } else if (this.selectedUser) {
         this.showConversation = true;
       }
     },
+    async ensureConversationExists(userId) {
+      try {
+        // Fetch conversation or create if it doesn't exist
+        const existingConversation = await this.$store.dispatch('fetchConversation', userId);
+        if (!existingConversation) {
+          await this.$store.dispatch('createConversation', userId);
+        }
+        // Set showConversation to true to display the conversation
+        this.showConversation = true;
+      } catch (error) {
+        console.error('Error ensuring conversation exists:', error);
+      }
+    },
+
         handleCloseConversation() {
             this.selectedUser = null;
             this.showConversation = false;
@@ -133,9 +158,9 @@ export default{
             this.isInputFocused = false;
         },
     },
-    async created() {
-        await this.$store.dispatch('fetchConversations'); // Fetch conversations when the component is created
-    },
+    // async created() {
+    //     await this.$store.dispatch('fetchConversations'); // Fetch conversations when the component is created
+    // },
     async mounted() {
         await this.$store.dispatch('initializeApp');
         this.$axios.get('/api/allusers')
