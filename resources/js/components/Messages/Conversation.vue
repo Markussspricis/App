@@ -78,8 +78,8 @@
       conversationId: String,
     },
     computed: {
-      ...mapState(['conversations']),
-    conversation() {
+  ...mapState(['conversations']),
+  conversation() {
       return this.conversations.find(conv => conv.ConversationID === this.conversationId);
     },
     conversationExists() {
@@ -92,56 +92,29 @@
     methods: {
       ...mapActions(['sendMessage', 'fetchConversation']),
       async sendMessageToStore() {
-      try {
-        console.log('Sending message...');
-        await this.fetchConversation(this.user.UserID); // Fetch conversation
-        
-        const ReceiverID = this.user.UserID;
-        if (!this.user || !this.messageText.trim()) {
-          console.log('User or message text is undefined');
-          return;
-        }
+  try {
+    console.log('Sending message...');
+    const ReceiverID = this.user.UserID;
+    if (!this.user || !this.messageText.trim()) {
+      console.log('User or message text is undefined');
+      return;
+    }
 
-        const messageData = {
-          ReceiverID: ReceiverID,
-          Content: this.messageText.trim(),
-          Image: this.messageImagenav
-        };
+    const messageData = {
+      ReceiverID: ReceiverID,
+      Content: this.messageText.trim(),
+      Image: this.messageImagenav
+    };
 
-        await this.sendMessage(messageData);
+    // Pass the conversationId to fetchConversation
+    await this.fetchConversation(this.conversationId, messageData);
 
-        this.messageText = '';
-        this.messageImagenav = null;
-      } catch (error) {
-        console.error('Error sending message:', error);
-      }
-    },
-  //   async fetchInitialData() {
-  //   try {
-  //     console.log('Fetching initial data...');
-  //     if (this.conversationId) { // Ensure conversationId is available and valid
-  //       await this.fetchMessages(this.conversationId); // Dispatch fetchMessages action with conversationId
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching initial data:', error);
-  //   }
-  // },
-    // async fetchMessages() {
-    //   try {
-    //     // Pass the conversationId to fetchMessages
-    //     await this.fetchMessages(this.conversationId); 
-    //   } catch (error) {
-    //     console.error('Error fetching messages:', error);
-    //   }
-    // },
-    // async fetchConversation() {
-    //   try {
-    //     await this.$store.dispatch('fetchConversation', this.conversationId);
-    //   } catch (error) {
-    //     console.error('Error fetching conversation:', error);
-    //     throw error;
-    //   }
-    // },
+    this.messageText = '';
+    this.messageImagenav = null;
+  } catch (error) {
+    console.error('Error sending message:', error);
+  }
+},
 
       closeConversation() {
         this.$emit('closeConversation');
@@ -181,17 +154,17 @@
       },
     },
     mounted() {
-    // Fetch initial data when component is mounted
-    console.log('Conversations:', this.conversations);
-  console.log('Conversation ID:', this.conversationId);
-    // this.fetchMessages(this.conversationId); 
-    // this.fetchConversation(this.conversationId); 
-    // this.fetchInitialData();
-//     if (this.conversationId) {
-//         this.fetchConversation(this.user.UserID); // Fetch conversation and messages
-//       }
-this.fetchConversation(this.conversationId);
-},
+      if (this.conversationId) {
+        // Only call fetchConversation if the conversationId is available
+        this.fetchConversation(this.conversationId);
+      }
+    },
+    watch: {
+    conversationId(newValue) {
+      // When the conversationId changes, refetch the conversation and its messages
+      this.fetchConversation(newValue);
+    },
+  },
   };
 </script>
   

@@ -104,15 +104,17 @@ export default{
     },
     methods: {
         async openConversation() {
-        if (!this.selectedUser && this.clickedPerson) {
-            const foundUser = this.foundUsers.find(user => user.UserID === this.clickedPerson);
-            if (foundUser) {
-                this.selectedUser = foundUser;
-                await this.ensureConversationExists(foundUser.UserID);
-            }
-        } else if (this.selectedUser) {
-            this.showConversation = true;
+      if (!this.selectedUser && this.clickedPerson) {
+        const foundUser = this.foundUsers.find(user => user.UserID === this.clickedPerson);
+        if (foundUser) {
+          this.selectedUser = foundUser;
+          await this.ensureConversationExists(foundUser.UserID);
         }
+      } else if (this.selectedUser) {
+        this.showConversation = true;
+        // Clear messages for the newly opened conversation
+        this.$store.commit('setMessagesForConversation', { conversationId: this.selectedUser.UserID, messages: [] });
+      }
     },
     async ensureConversationExists(userId) {
         try {

@@ -38,6 +38,7 @@ const store = createStore({
     },
     setConversationId(state, conversationId) {
       state.selectedConversationId = conversationId; // Assuming you have a state property named selectedConversationId to store the conversation ID
+      state.selectedConversationMessages = state.conversations.find(conv => conv.ConversationID === conversationId)?.messages || [];
     },
     removeToken(state) {
       localStorage.removeItem(TOKEN_KEY);
@@ -177,16 +178,6 @@ const store = createStore({
         throw error;
       }
     },
-    // async fetchMessages({ commit }, conversationId) {
-    //   try {
-    //     const response = await axios.get(`/api/conversation-messages/${conversationId}`);
-    //     const { messages } = response.data;
-    //     commit('setMessagesForConversation', { conversationId, messages });
-    //   } catch (error) {
-    //     console.error('Error fetching messages:', error);
-    //     throw error;
-    //   }
-    // },    
   },
 });
 
