@@ -74,31 +74,6 @@ class MessageController extends Controller
             return $diff->s . 's';
         }
     }
-    public function getConversationMessages($conversationID)
-    {
-        try {
-            // Fetch messages based on the provided conversation ID
-            $messages = Messages::where('ConversationID', $conversationID)->with(['sender', 'receiver'])->get();
-
-            // Check if any messages are found
-            if ($messages->isEmpty()) {
-                return response()->json(['error' => 'No messages found for the provided conversation ID'], 404);
-            }
-
-            // Augment each message with additional properties
-            foreach ($messages as $message) {
-                $message->time_ago = $this->formatTimeAgo($message->created_at, Carbon::now());
-                $message->type = ($message->sender_id == auth()->id()) ? 'sent' : 'received'; // Assuming authenticated user ID is used for comparison
-            }
-
-            // Sort the messages by created_at timestamp
-            $messages = $messages->sortBy('created_at')->values()->all();
-
-            return response()->json(['conversationId' => $conversationID, 'messages' => $messages]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Error fetching messages: ' . $e->getMessage()], 500);
-        }
-    }
 
     public function deleteMessage($id)
     {
@@ -125,7 +100,22 @@ class MessageController extends Controller
                 ->where('user2_id', $authUserId);
         })->first();
 
-        return response()->json(['conversation' => $conversation]); // Return conversation directly
+        // If conversation exists, fetch associated messages
+        if ($conversation) {
+            $messages = Messages::where('ConversationID', $conversation->ConversationID)
+                                ->with(['sender', 'receiver'])
+                                ->orderBy('created_at')
+                                ->get();
+
+            // Augment each message with additional properties
+            $now = Carbon::now();
+            foreach ($messages as $message) {
+                $message->time_ago = $this->formatTimeAgo($message->created_at, $now);
+                $message->type = ($message->sender->id == $authUserId) ? 'sent' : 'received'; // Use authenticated user for comparison
+            }
+        }
+
+        return response()->json(['conversation' => $conversation, 'messages' => $messages ?? []]);
     }
 
     public function createConversation(Request $request)

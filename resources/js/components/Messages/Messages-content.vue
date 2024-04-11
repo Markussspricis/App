@@ -40,7 +40,7 @@
                     <div class="person-conversation">
                     </div>
                 </div>
-                <Conversation v-if="showConversation" :user="selectedUser" @closeConversation="handleCloseConversation"/>
+                <Conversation v-if="showConversation" :conversationId="conversationId" :user="selectedUser" @closeConversation="handleCloseConversation"/>
             </div>
         </div>
     </div>
@@ -103,43 +103,32 @@ export default{
         }
     },
     methods: {
-    //     openConversation(conversationId) {
-    //   if (!this.selectedUser && this.clickedPerson) {
-    //     const foundUser = this.foundUsers.find((user) => user.UserID === this.clickedPerson);
-    //     if (foundUser) {
-    //       this.selectedUser = foundUser;
-    //       this.showConversation = true;
-    //       if (!this.conversations.includes(foundUser.UserID)) {
-    //         this.conversations.push(foundUser.UserID);
-    //       }
-    //     }
-    //   } else if (this.selectedUser) {
-    //     this.showConversation = true;
-    //   }
-    // },
-    openConversation() {
-      if (!this.selectedUser && this.clickedPerson) {
-        const foundUser = this.foundUsers.find(user => user.UserID === this.clickedPerson);
-        if (foundUser) {
-          this.selectedUser = foundUser;
-          this.ensureConversationExists(foundUser.UserID);
+        async openConversation() {
+        if (!this.selectedUser && this.clickedPerson) {
+            const foundUser = this.foundUsers.find(user => user.UserID === this.clickedPerson);
+            if (foundUser) {
+                this.selectedUser = foundUser;
+                await this.ensureConversationExists(foundUser.UserID);
+            }
+        } else if (this.selectedUser) {
+            this.showConversation = true;
         }
-      } else if (this.selectedUser) {
-        this.showConversation = true;
-      }
     },
     async ensureConversationExists(userId) {
-      try {
-        // Fetch conversation or create if it doesn't exist
-        const existingConversation = await this.$store.dispatch('fetchConversation', userId);
-        if (!existingConversation) {
-          await this.$store.dispatch('createConversation', userId);
+        try {
+            // Fetch conversation or create if it doesn't exist
+            const existingConversation = await this.$store.dispatch('fetchConversation', userId);
+            if (!existingConversation) {
+                const createdConversation = await this.$store.dispatch('createConversation', userId);
+                this.$store.commit('setConversationId', createdConversation.conversationId);
+            } else {
+                this.$store.commit('setConversationId', existingConversation.conversationId);
+            }
+            // Set showConversation to true to display the conversation
+            this.showConversation = true;
+        } catch (error) {
+            console.error('Error ensuring conversation exists:', error);
         }
-        // Set showConversation to true to display the conversation
-        this.showConversation = true;
-      } catch (error) {
-        console.error('Error ensuring conversation exists:', error);
-      }
     },
 
         handleCloseConversation() {

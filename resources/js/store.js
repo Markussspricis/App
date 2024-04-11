@@ -16,30 +16,24 @@ const store = createStore({
       state.isLoggedIn = !!user;
     },
     setConversation(state, conversation) {
-      // Find if the conversation already exists in state
-      const existingConversationIndex = state.conversations.findIndex(conv => conv.ConversationID === conversation.ConversationID);
-      if (existingConversationIndex !== -1) {
-        // If the conversation already exists, update it
-        state.conversations[existingConversationIndex] = conversation;
+      // Update or add conversation to the conversations array
+      const index = state.conversations.findIndex(conv => conv?.conversation?.ConversationID === conversation?.conversation?.ConversationID);
+      if (index !== -1) {
+        state.conversations[index] = conversation;
       } else {
-        // If the conversation doesn't exist, add it to the array
         state.conversations.push(conversation);
       }
-      // localStorage.setItem('conversations', JSON.stringify(state.conversations)); // Optionally update localStorage
     },
-    // Add message to the conversation in state
-    addMessageToConversation(state, { conversationId, message }) {
-      const conversation = state.conversations.find(conv => conv.ConversationID === conversationId);
-      if (conversation) {
-        // Ensure conversation.messages is an array
-        conversation.messages = conversation.messages || [];
-        conversation.messages.push(message);
-      }
-    },    
     setMessagesForConversation(state, { conversationId, messages }) {
       const conversation = state.conversations.find(conv => conv.ConversationID === conversationId);
       if (conversation) {
         conversation.messages = messages;
+      }
+    },
+    addMessageToConversation(state, { conversationId, message }) {
+      const conversation = state.conversations.find(conv => conv.ConversationID === conversationId);
+      if (conversation) {
+        conversation.messages.push(message);
       }
     },
     setConversationId(state, conversationId) {
@@ -155,43 +149,44 @@ const store = createStore({
     async fetchConversation({ commit }, userId) {
       try {
         const response = await axios.get(`/api/conversations/${userId}`);
-        console.log('Conversation Data:', response.data);
-    
-        // Check if ConversationID is present in the response
-        if (response.data && response.data.conversation && response.data.conversation.ConversationID) {
-          commit('setConversation', response.data.conversation);
-          commit('setConversationId', response.data.conversation.ConversationID); // Set the ConversationID in the store
-          return response.data.conversation;
+        const { conversation, messages } = response.data;
+  
+        if (conversation) {
+          // Update conversation in the store
+          commit('setConversation', { conversation, messages });
+          return conversation;
         } else {
-          throw new Error('ConversationID not found in the response');
+          console.warn('Conversation data is null in the response:', response.data);
+          return null;
         }
       } catch (error) {
         console.error('Error fetching conversation:', error);
         throw error;
       }
-    },    
+    },
+    
     // Add action to create a conversation with a user
-    async createConversation(_, userId) { // Removed `commit` from function parameters
+    async createConversation({ commit }, userId) { // Modified to accept `commit`
       try {
         const response = await axios.post('/api/conversations', { userId });
-        // You may want to commit the created conversation to the state if needed
+        // Update conversation in the store
+        commit('setConversation', response.data);
         return response.data.conversation;
       } catch (error) {
         console.error('Error creating conversation:', error);
         throw error;
       }
     },
-    async fetchMessages({ commit, state }) {
-      try {
-        const conversationId = state.selectedConversationId; // Get the ConversationID from the store
-        const response = await axios.get(`/api/conversation-messages/${conversationId}`);
-        const { messages } = response.data;
-        commit('setMessagesForConversation', { conversationId, messages });
-      } catch (error) {
-        console.error('Error fetching messages:', error);
-        throw error;
-      }
-    },    
+    // async fetchMessages({ commit }, conversationId) {
+    //   try {
+    //     const response = await axios.get(`/api/conversation-messages/${conversationId}`);
+    //     const { messages } = response.data;
+    //     commit('setMessagesForConversation', { conversationId, messages });
+    //   } catch (error) {
+    //     console.error('Error fetching messages:', error);
+    //     throw error;
+    //   }
+    // },    
   },
 });
 

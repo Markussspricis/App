@@ -1,6 +1,6 @@
 <template>
   <!-- <div class="conversation-overlay"> -->
-    <div class="conversation">
+    <div class="conversation" v-if="conversationExists">
       <div class="top-bar">
         <button class="close" @click="closeConversation">
           <ion-icon name="arrow-back-outline"></ion-icon>
@@ -51,6 +51,9 @@
         </div>
       </div>
     </div>
+    <div v-else>
+      <p>No conversation found.</p>
+    </div>
   <!-- </div> -->
 </template>
   
@@ -76,14 +79,18 @@
     },
     computed: {
       ...mapState(['conversations']),
-        conversationMessages() {
-          // Retrieve messages for the current conversation from Vuex state
-          const conversation = this.conversations.find(conv => conv.ConversationID === this.conversationId);
-          return conversation && conversation.messages ? conversation.messages : [];
-        },
+    conversation() {
+      return this.conversations.find(conv => conv.ConversationID === this.conversationId);
+    },
+    conversationExists() {
+      return !!this.conversation;
+    },
+    conversationMessages() {
+      return this.conversation ? this.conversation.messages || [] : [];
+    },
     },
     methods: {
-      ...mapActions(['sendMessage', 'fetchConversation', 'fetchMessages']),
+      ...mapActions(['sendMessage', 'fetchConversation']),
       async sendMessageToStore() {
       try {
         console.log('Sending message...');
@@ -109,15 +116,16 @@
         console.error('Error sending message:', error);
       }
     },
-    async fetchInitialData() {
-      try {
-        console.log('Fetching initial data...');
-        await this.fetchConversation(this.conversationId);
-        await this.fetchMessages(this.conversationId);
-      } catch (error) {
-        console.error('Error fetching initial data:', error);
-      }
-    },
+  //   async fetchInitialData() {
+  //   try {
+  //     console.log('Fetching initial data...');
+  //     if (this.conversationId) { // Ensure conversationId is available and valid
+  //       await this.fetchMessages(this.conversationId); // Dispatch fetchMessages action with conversationId
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching initial data:', error);
+  //   }
+  // },
     // async fetchMessages() {
     //   try {
     //     // Pass the conversationId to fetchMessages
@@ -174,11 +182,15 @@
     },
     mounted() {
     // Fetch initial data when component is mounted
-    console.log('Component mounted');
-    console.log('User:', this.user);
+    console.log('Conversations:', this.conversations);
+  console.log('Conversation ID:', this.conversationId);
     // this.fetchMessages(this.conversationId); 
     // this.fetchConversation(this.conversationId); 
-    this.fetchInitialData();
+    // this.fetchInitialData();
+//     if (this.conversationId) {
+//         this.fetchConversation(this.user.UserID); // Fetch conversation and messages
+//       }
+this.fetchConversation(this.conversationId);
 },
   };
 </script>
