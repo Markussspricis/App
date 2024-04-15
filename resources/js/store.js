@@ -15,15 +15,17 @@ const store = createStore({
       state.user = user;
       state.isLoggedIn = !!user;
     },
-    setConversation(state, conversation) {
+    setConversation(state, { conversation, messages }) {
       // Update or add conversation to the conversations array
-      const index = state.conversations.findIndex(conv => conv?.conversation?.ConversationID === conversation?.conversation?.ConversationID);
+      const index = state.conversations.findIndex(conv => conv.conversation.ConversationID === conversation.ConversationID);
       if (index !== -1) {
-        state.conversations[index] = conversation;
+          // If conversation exists, update its messages
+          state.conversations[index].messages = messages;
       } else {
-        state.conversations.push(conversation);
+          // If conversation doesn't exist, add it with messages
+          state.conversations.push({ conversation, messages });
       }
-    },
+  },
     setMessagesForConversation(state, { conversationId, messages }) {
       const conversation = state.conversations.find(conv => conv.ConversationID === conversationId);
       if (conversation) {
@@ -31,11 +33,11 @@ const store = createStore({
       }
     },
     addMessageToConversation(state, { conversationId, message }) {
-      const conversation = state.conversations.find(conv => conv.ConversationID === conversationId);
+      const conversation = state.conversations.find(conv => conv.conversation.ConversationID === conversationId);
       if (conversation) {
-        conversation.messages.push(message);
+          conversation.messages.push(message);
       }
-    },
+  },
     setConversationId(state, conversationId) {
       state.selectedConversationId = conversationId; // Assuming you have a state property named selectedConversationId to store the conversation ID
       state.selectedConversationMessages = state.conversations.find(conv => conv.ConversationID === conversationId)?.messages || [];
@@ -149,22 +151,22 @@ const store = createStore({
     },    
     async fetchConversation({ commit }, userId) {
       try {
-        const response = await axios.get(`/api/conversations/${userId}`);
-        const { conversation, messages } = response.data;
+          const response = await axios.get(`/api/conversations/${userId}`);
+          const { conversation, messages } = response.data;
   
-        if (conversation) {
-          // Update conversation in the store
-          commit('setConversation', { conversation, messages });
-          return conversation;
-        } else {
-          console.warn('Conversation data is null in the response:', response.data);
-          return null;
-        }
+          if (conversation) {
+              // Update or add conversation to the conversations array
+              commit('setConversation', { conversation, messages });
+              return conversation;
+          } else {
+              console.warn('Conversation data is null in the response:', response.data);
+              return null;
+          }
       } catch (error) {
-        console.error('Error fetching conversation:', error);
-        throw error;
+          console.error('Error fetching conversation:', error);
+          throw error;
       }
-    },
+  },
     
     // Add action to create a conversation with a user
     async createConversation({ commit }, userId) { // Modified to accept `commit`

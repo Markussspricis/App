@@ -91,6 +91,11 @@
     },
     methods: {
       ...mapActions(['sendMessage', 'fetchConversation']),
+      async fetchConversationData() {
+  if (this.conversationId) {
+    await this.fetchConversation(this.conversationId);
+  }
+},
       async sendMessageToStore() {
   try {
     console.log('Sending message...');
@@ -154,17 +159,15 @@
       },
     },
     mounted() {
-      if (this.conversationId) {
-        // Only call fetchConversation if the conversationId is available
-        this.fetchConversation(this.conversationId);
-      }
-    },
-    watch: {
-    conversationId(newValue) {
-      // When the conversationId changes, refetch the conversation and its messages
-      this.fetchConversation(newValue);
-    },
+  // Fetch conversation and messages data when component is mounted
+  this.fetchConversationData();
+},
+watch: {
+  conversationId(newValue) {
+    // When conversationId changes, refetch conversation and messages
+    this.fetchConversation(newValue);
   },
+},
   };
 </script>
   
