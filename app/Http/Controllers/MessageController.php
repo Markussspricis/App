@@ -88,6 +88,26 @@ class MessageController extends Controller
         return response()->json(['message' => 'Message deleted successfully']);
     }
 
+    public function checkConversation(Request $request, $userId)
+    {
+        $authUserId = Auth::id();
+
+        // Check if a conversation exists between the authenticated user and the specified user
+        $conversation = Conversation::where(function ($query) use ($authUserId, $userId) {
+            $query->where('user1_id', $authUserId)
+                ->where('user2_id', $userId);
+        })->orWhere(function ($query) use ($authUserId, $userId) {
+            $query->where('user1_id', $userId)
+                ->where('user2_id', $authUserId);
+        })->first();
+
+        if ($conversation) {
+            return response()->json(['conversationExists' => true, 'conversation' => $conversation]);
+        } else {
+            return response()->json(['conversationExists' => false]);
+        }
+    }
+
     public function getConversation(Request $request, $userId)
     {
         $authUserId = Auth::id();
@@ -100,28 +120,35 @@ class MessageController extends Controller
                 ->where('user2_id', $authUserId);
         })->first();
 
-        // If conversation exists, fetch associated messages
-        if ($conversation) {
-            $messages = Messages::where('ConversationID', $conversation->ConversationID)
-                                ->with(['sender', 'receiver'])
-                                ->orderBy('created_at')
-                                ->get();
-
-            // Augment each message with additional properties
-            $now = Carbon::now();
-            foreach ($messages as $message) {
-                $message->time_ago = $this->formatTimeAgo($message->created_at, $now);
-                $message->type = ($message->sender->id == $authUserId) ? 'sent' : 'received'; // Use authenticated user for comparison
-            }
+        if (!$conversation) {
+            return response()->json(['message' => 'Conversation not found'], 404);
         }
 
-        return response()->json(['conversation' => $conversation, 'messages' => $messages ?? []]);
+        // If conversation exists, fetch associated messages
+        $messages = Messages::where('ConversationID', $conversation->ConversationID)
+                            ->with(['sender', 'receiver'])
+                            ->orderBy('created_at')
+                            ->get();
+
+        if ($messages->isEmpty()) {
+            return response()->json(['message' => 'No messages found in this conversation'], 404);
+        }
+
+        // Augment each message with additional properties
+        $now = Carbon::now();
+        foreach ($messages as $message) {
+            $message->time_ago = $this->formatTimeAgo($message->created_at, $now);
+            $message->type = ($message->SenderID == $authUserId) ? 'sent' : 'received'; // Use authenticated user for comparison
+        }
+
+        return response()->json(['conversation' => $conversation, 'messages' => $messages]);
     }
 
     public function createConversation(Request $request)
     {
         $authUserId = Auth::id();
         $userId = $request->input('userId');
+
         // Create a new conversation
         $conversation = new Conversation();
         $conversation->user1_id = $authUserId;
@@ -130,4 +157,18 @@ class MessageController extends Controller
 
         return response()->json(['conversation' => $conversation]);
     }
+
+    public function getUserConversations(Request $request)
+    {
+        $userId = Auth::id();
+        
+        // Fetch conversations for the authenticated user
+        $conversations = Conversation::where('user1_id', $userId)
+            ->orWhere('user2_id', $userId)
+            ->with(['user1', 'user2']) // Eager load both user1 and user2 relationships
+            ->get();
+        
+        return response()->json(['conversations' => $conversations]);
+    }
+
 }

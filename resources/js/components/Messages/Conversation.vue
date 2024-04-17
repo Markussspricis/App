@@ -1,64 +1,58 @@
 <template>
-  <!-- <div class="conversation-overlay"> -->
-    <div class="conversation" v-if="conversationExists">
-      <div class="top-bar">
-        <button class="close" @click="closeConversation">
-          <ion-icon name="arrow-back-outline"></ion-icon>
-        </button>
-        <div class="person-img">
-          <img :src="'/storage/' + user.ProfilePicture">
-        </div>
-        <div class="top-user">
-          <p class="name">{{ user.Name }}</p>
-          <p class="tag">{{ user.UserTag }}</p>
-        </div>
+  <div class="conversation">
+    <div class="top-bar">
+      <button class="close" @click="closeConversation">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </button>
+      <div class="person-img">
+        <img :src="'/storage/' + user.ProfilePicture">
       </div>
-
-      <div class="messages">
-        <div v-for="(message, index) in conversationMessages" :key="index" class="message">
-          <div v-if="message.type === 'sent'" class="sent">
-            <div class="content">{{ message.Content }}</div>
-            <div class="image">
-              <img v-if="message.Image" :src="'/storage/' + message.Image" alt="Sent Image">
-            </div>
-            <span class="time">{{ message.time_ago }}</span>
-          </div>
-          <div v-else class="received">
-            <div class="content">{{ message.Content }}</div>
-            <div class="image">
-              <img v-if="message.Image" :src="'/storage/' + message.Image" alt="Received Image">
-            </div>
-            <div class="time">{{ message.time_ago }}</div>
-          </div>
-        </div>
+      <div class="top-user">
+        <p class="name">{{ user.Name }}</p>
+        <p class="tag">{{ user.UserTag }}</p>
       </div>
+    </div>
 
-      <div class="bottom">
-        <div class="message-input-container">
-          <textarea class="message-input" rows="1" @input="handleInput" ref="tweetInputnav" placeholder="Message..." maxlength="255"></textarea>
-        </div>
-        <div class="message-image-preview">
-          <img :src="previewImagenav" v-if="previewImagenav">
-          <div class="preview-cover" v-if="previewImagenav">
-            <div class="preview-close" @click="removeImage">
-              <ion-icon class="preview-close-icon" name="close"></ion-icon>
-            </div>
+    <div class="messages" ref="messagesContainer">
+      <div class="message" v-for="message in messages" :key="message.MessageID">
+        <div v-if="message.type === 'sent'" class="sent">
+          <div class="content">{{ message.Content }}</div>
+          <div class="image">
+            <img v-if="message.Image" :src="'/storage/' + message.Image" alt="Sent Image">
           </div>
+          <span class="time">{{ message.time_ago }}</span>
         </div>
-        <div class="buttons">
-          <button class="message-btn"><input type="file" accept="image/png, image/gif, image/jpeg, video/mp4,video/x-m4v,video/*" id="message-img-input" @change="onImageChangenav" hidden><label for="message-img-input" class="message-img-label"><ion-icon name="images-outline" class="create-message-icon"></ion-icon></label></button>
-          <button class="popup-button" @click="sendMessageToStore" :disabled="isSendDisabled">Send</button>
+        <div v-else class="received">
+          <div class="content">{{ message.Content }}</div>
+          <div class="image">
+            <img v-if="message.Image" :src="'/storage/' + message.Image" alt="Received Image">
+          </div>
+          <div class="time">{{ message.time_ago }}</div>
         </div>
       </div>
     </div>
-    <div v-else>
-      <p>No conversation found.</p>
+
+    <div class="bottom">
+      <div class="message-input-container">
+        <textarea class="message-input" rows="1" @input="handleInput" ref="tweetInputnav" placeholder="Message..." maxlength="255"></textarea>
+      </div>
+      <div class="message-image-preview">
+        <img :src="previewImagenav" v-if="previewImagenav">
+        <div class="preview-cover" v-if="previewImagenav">
+          <div class="preview-close" @click="removeImage">
+            <ion-icon class="preview-close-icon" name="close"></ion-icon>
+          </div>
+        </div>
+      </div>
+      <div class="buttons">
+        <button class="message-btn"><input type="file" accept="image/png, image/gif, image/jpeg, video/mp4,video/x-m4v,video/*" id="message-img-input" @change="onImageChangenav" hidden><label for="message-img-input" class="message-img-label"><ion-icon name="images-outline" class="create-message-icon"></ion-icon></label></button>
+        <button class="popup-button" :disabled="isSendDisabled" @click="sendMessage">Send</button>
+      </div>
     </div>
-  <!-- </div> -->
+  </div>
 </template>
   
 <script>
-  import { mapState, mapActions } from 'vuex';
   export default {
     name: 'Conversation',
     data(){
@@ -66,61 +60,55 @@
         previewImagenav: null,
         messageImagenav: null,
         messageText: '',
-        // receivedMessages: [],
-        // sentMessages: [],
-        messages: [],
         loggedInUserID: null,
-        isSendDisabled: true
+        isSendDisabled: true,
+        messages: [],
       }
     },
     props: {
       user: Object,
-      conversationId: String,
-    },
-    computed: {
-  ...mapState(['conversations']),
-  conversation() {
-      return this.conversations.find(conv => conv.ConversationID === this.conversationId);
-    },
-    conversationExists() {
-      return !!this.conversation;
-    },
-    conversationMessages() {
-      return this.conversation ? this.conversation.messages || [] : [];
-    },
     },
     methods: {
-      ...mapActions(['sendMessage', 'fetchConversation']),
-      async fetchConversationData() {
-  if (this.conversationId) {
-    await this.fetchConversation(this.conversationId);
-  }
-},
-      async sendMessageToStore() {
-  try {
-    console.log('Sending message...');
-    const ReceiverID = this.user.UserID;
-    if (!this.user || !this.messageText.trim()) {
-      console.log('User or message text is undefined');
-      return;
-    }
+      async sendMessage() {
+        if (!this.messageText.trim()) return;
+        const formData = new FormData();
+        formData.append('ReceiverID', this.user.UserID);
+        formData.append('Content', this.messageText);
+        formData.append('image', this.messageImagenav);
 
-    const messageData = {
-      ReceiverID: ReceiverID,
-      Content: this.messageText.trim(),
-      Image: this.messageImagenav
-    };
-
-    // Pass the conversationId to fetchConversation
-    await this.fetchConversation(this.conversationId, messageData);
-
-    this.messageText = '';
-    this.messageImagenav = null;
-  } catch (error) {
-    console.error('Error sending message:', error);
-  }
-},
-
+        try {
+            await this.$axios.post('/api/send-message', formData);
+            // Clear input fields and variables after sending message
+            this.$refs.tweetInputnav.value = '';
+            this.previewImagenav = null;
+            this.messageImagenav = null;
+            this.isSendDisabled = true;
+            this.resetInputHeight();
+            // Fetch updated messages after sending message
+            this.fetchMessages();
+            this.$nextTick(() => {
+              setTimeout(() => {
+                this.scrollToBottom();
+              }, 1000); // Adjust delay as needed
+            });
+        } catch (error) {
+            console.error(error);
+        }
+      },
+      resetInputHeight() {
+        const textarea = this.$refs.tweetInputnav;
+        textarea.style.height = ''; // Resetting the height to its default value
+      },
+      async fetchMessages() {
+        try {
+          const response = await this.$axios.get(`/api/conversation/${this.user.UserID}`);
+          if (response.data.messages) {
+            this.messages = response.data.messages;
+          }
+        } catch (error) {
+          console.error("Error fetching messages:", error);
+        }
+      },
       closeConversation() {
         this.$emit('closeConversation');
       },
@@ -154,20 +142,22 @@
         this.isSendDisabled = !this.messageText.trim();
       },
       removeImage(){
-        // this.tweetImage = null;
         this.previewImagenav = null;
+      },
+      scrollToBottom() {
+        if (this.$refs.messagesContainer && this.messages.length > 0) {
+          this.$refs.messagesContainer.scrollTop = this.$refs.messagesContainer.scrollHeight;
+        }
       },
     },
     mounted() {
-  // Fetch conversation and messages data when component is mounted
-  this.fetchConversationData();
-},
-watch: {
-  conversationId(newValue) {
-    // When conversationId changes, refetch conversation and messages
-    this.fetchConversation(newValue);
-  },
-},
+      // Fetch messages when the component is mounted
+      this.fetchMessages().then(() => {
+        setTimeout(() => {
+          this.scrollToBottom();
+        }, 50);
+      });
+    },
   };
 </script>
   
@@ -332,6 +322,7 @@ watch: {
             //padding-left: 5px;
             .content{
               color: red;
+              white-space: pre-wrap;
               // display: flex;
               // justify-content: flex-start;
             }
@@ -359,6 +350,7 @@ watch: {
             // word-break: break-all;
             .content{
               color: green;
+              white-space: pre-wrap;
               // display: flex;
               // justify-content: flex-start;
             }

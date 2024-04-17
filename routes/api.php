@@ -27,10 +27,11 @@ Route::middleware('auth:sanctum')->get('/get-user-tag/{tag}', [UserController::c
 Route::middleware('auth:sanctum')->get('/update-follower-count/{userID}', [UserController::class, 'updateFollowerCount']);
 
 Route::middleware('auth:sanctum')->post('/send-message', [MessageController::class, 'sendMessage']);
-// Route::middleware('auth:sanctum')->get('/conversation-messages/{conversationID}', [MessageController::class, 'getConversationMessages']);
 Route::delete('/messages/{id}', [MessageController::class, 'deleteMessage']);
-Route::middleware('auth:sanctum')->get('/conversations/{userId}', [MessageController::class, 'getConversation']);
-Route::middleware('auth:sanctum')->post('/conversations', [MessageController::class, 'createConversation']);
+Route::middleware('auth:sanctum')->get('/check-conversation/{userId}', [MessageController::class, 'checkConversation']);
+Route::middleware('auth:sanctum')->get('/conversation/{userId}', [MessageController::class, 'getConversation']);
+Route::middleware('auth:sanctum')->post('/create-conversation', [MessageController::class, 'createConversation']);
+Route::middleware('auth:sanctum')->get('/user-conversations', [MessageController::class, 'getUserConversations']);
 
 Route::middleware('auth:sanctum')->post('tweets', [TweetController::class, 'createTweet']);
 Route::middleware('auth:sanctum')->get('/tweet_type/{type}/{page}', [TweetController::class, 'getTweets']);

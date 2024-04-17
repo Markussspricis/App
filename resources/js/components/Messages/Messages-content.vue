@@ -1,5 +1,6 @@
 <template>
     <div class="messages-container">
+        <!-- Header -->
         <div class="top-top">
             <button class="back-icon" @click="goBack">
                 <ion-icon name="arrow-back-outline"></ion-icon>
@@ -9,7 +10,10 @@
                 <p class="user-tag">{{ user.UserTag }}</p>
             </div>
         </div>
+        
+        <!-- Main content -->
         <div class="messages-sub">
+            <!-- Left side: Start a new conversation -->
             <div class="messages-main">
                 <div class="main-text">Start a new conversation</div>
                 <div class="search-people">
@@ -18,60 +22,65 @@
                         <ion-icon name="search-outline" class="search-icon"></ion-icon>
                     </div>
                     <div class="people-container">
-                        <div class="person" v-for="Person in foundUsers" :key="Person.UserID" @click="Person.personClicked = true; clickedPerson = Person.UserID" :class="{ 'highlighted': Person.UserID === clickedPerson }">
+                        <div class="person" v-for="person in foundUsers" :key="person.UserID" @click="handlePersonClick(person)" :class="{ 'highlighted': person.UserID === clickedPerson }">
                             <div class="user-info">
-                                <img :src="'/storage/' + Person.ProfilePicture" class="person-img">
+                                <img :src="'/storage/' + person.ProfilePicture" class="person-img">
                                 <div class="person-info">
-                                    <p class="username">{{ Person.Name }}</p>
-                                    <p class="usertag">{{ Person.UserTag }}</p>
+                                    <p class="username">{{ person.Name }}</p>
+                                    <p class="usertag">{{ person.UserTag }}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <button class="next-btn" :disabled="!clickedPerson" @click="openConversation(selectedUser)">Start conversation</button>
+                <button class="next-btn" :disabled="!clickedPerson" @click="openConversation">Start conversation</button>
             </div>
+            
+            <!-- Right side: Your conversations -->
             <div class="messages-right">
                 <div class="right-text">Your conversations</div>
                 <div class="conversations">
-                    <!-- <div v-for="conversationId in conversations" :key="conversationId" class="person-conversation" @click="openConversation(conversationId)">
-                        <div>{{ getConversationByUserId(conversationId).Name }}</div>
-                    </div> -->
-                    <div class="person-conversation">
+                    <div class="person" v-for="conversation in userConversations" :key="conversation.ConversationID" @click="openConversation(conversation)">
+                        <div class="user-info">
+                            <!-- Choose either user1 or user2 based on the current user -->
+                            <img :src="'/storage/' + (conversation.user1.UserID !== currentUser.UserID ? conversation.user1.ProfilePicture : conversation.user2.ProfilePicture)" class="person-img">
+                            <div class="person-info">
+                                <!-- Choose either user1 or user2 based on the current user -->
+                                <p class="username">{{ conversation.user1.UserID !== currentUser.UserID ? conversation.user1.Name : conversation.user2.Name }}</p>
+                                <!-- Choose either user1 or user2 based on the current user -->
+                                <p class="usertag">{{ conversation.user1.UserID !== currentUser.UserID ? conversation.user1.UserTag : conversation.user2.UserTag }}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <Conversation v-if="showConversation" :conversationId="conversationId" :user="selectedUser" @closeConversation="handleCloseConversation"/>
+                <Conversation v-if="showConversation" :user="selectedUser" @closeConversation="handleCloseConversation"/>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import Conversation from './Conversation.vue';
-import { mapState, mapActions} from 'vuex';
-export default{
+import { useStore } from 'vuex';
+import axios from 'axios';
+
+export default {
     name: 'MessagesContent',
     components: {
         Conversation,
     },
-    data() {
-        return {
-            isInputFocused: false,
-            personClicked: false,
-            showConversation: false,
-            selectedUser: null,
-            conversations: [],
-        };
-    },
-    computed: {
-        ...mapState(['user']),
-    },
-    setup () {
+    setup() {
+        const $axios = axios.create({ baseURL: '/api/' });
         const searchInput = ref('');
+        const userConversations = ref([]);
         const users = ref([]);
         const clickedPerson = ref(null);
         const selectedUser = ref(null);
+        const showConversation = ref(false);
+        const isInputFocused = ref(false);
+        const store = useStore();
+        const currentUser = computed(() => store.state.user);
 
         const foundUsers = computed(() => {
             if (searchInput.value.length > 0) {
@@ -84,85 +93,133 @@ export default{
                 return [];
             }
         });
-        const handlePersonClick = (Person) => {
-            this.clickedPerson = Person.UserID;
+
+        const handlePersonClick = (person) => {
+            clickedPerson.value = person.UserID;
+            selectedUser.value = person;
         };
+
         const handleSearchInput = () => {
             if (searchInput.value.length === 0) {
                 clickedPerson.value = null;
             }
         };
+
+        const fetchUserConversations = async (currentUser) => {
+            try {
+                const response = await $axios.get('/user-conversations');
+                const conversations = response.data.conversations;
+                userConversations.value = conversations.filter(conversation =>
+                    conversation.user1.UserID === currentUser.value.UserID || conversation.user2.UserID === currentUser.value.UserID
+                );
+            } catch (error) {
+                console.error("Error fetching user's conversations:", error);
+            }
+        };
+
+        const openConversation = async () => {
+            try {
+                if (!selectedUser.value) {
+                    console.error("No selected user to start conversation with.");
+                    return;
+                }
+
+                // Check if conversation exists
+                const response = await $axios.get(`/check-conversation/${selectedUser.value.UserID}`);
+                if (response.data.conversationExists) {
+                    // If conversation exists, fetch messages for the existing conversation
+                    await fetchConversation(selectedUser.value.UserID);
+                } else {
+                    // If conversation doesn't exist, create a new conversation
+                    await createConversation(selectedUser.value.UserID);
+                }
+
+                // Show conversation
+                showConversation.value = true;
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        const fetchConversation = async (userId) => {
+            try {
+                const response = await $axios.get(`/conversation/${userId}`);
+                if (response.data.conversation) {
+                    console.log("Conversation fetched successfully");
+                    // Handle fetched conversation data, such as setting it to a reactive variable
+                } else {
+                    console.error("Failed to fetch conversation");
+                }
+            } catch (error) {
+                console.error("Error fetching conversation:", error);
+            }
+        };
+
+        const createConversation = async (userId) => {
+            try {
+                const response = await $axios.post('/create-conversation', { userId });
+                if (response.data.conversation) {
+                    console.log("Conversation created successfully");
+                } else {
+                    console.error("Failed to create conversation");
+                }
+            } catch (error) {
+                console.error("Error creating conversation:", error);
+            }
+        };
+
+        const handleCloseConversation = () => {
+            clickedPerson.value = null; // Clear the clicked person
+            selectedUser.value = null; // Reset the selected user
+            showConversation.value = false;
+            searchInput.value = ''; // Clear the search input
+        };
+
+        const goBack = () => {
+            window.history.length > 1 ? window.history.go(-1) : this.$router.push('/');
+        };
+
+        const inputFocus = () => {
+            isInputFocused.value = true;
+        };
+
+        const inputBlur = () => {
+            isInputFocused.value = false;
+        };
+
+        // Call the API to fetch users when component is mounted
+        onMounted(async () => {
+            try {
+                await fetchUserConversations(currentUser);
+                const response = await $axios.get('/allusers');
+                users.value = response.data;
+            } catch (error) {
+                console.error("Error fetching users:", error);
+            }
+        });
+
         return {
-            handlePersonClick,
             searchInput,
             foundUsers,
             clickedPerson,
             selectedUser,
+            handlePersonClick,
             handleSearchInput,
-            users,
-        }
+            handleCloseConversation,
+            goBack,
+            inputFocus,
+            inputBlur,
+            showConversation,
+            isInputFocused,
+            $axios,
+            openConversation,
+            user: computed(() => store.state.user),
+        };
     },
-    methods: {
-        async openConversation() {
-      if (!this.selectedUser && this.clickedPerson) {
-        const foundUser = this.foundUsers.find(user => user.UserID === this.clickedPerson);
-        if (foundUser) {
-          this.selectedUser = foundUser;
-          await this.ensureConversationExists(foundUser.UserID);
-        }
-      } else if (this.selectedUser) {
-        this.showConversation = true;
-        // Clear messages for the newly opened conversation
-        this.$store.commit('setMessagesForConversation', { conversationId: this.selectedUser.UserID, messages: [] });
-      }
-    },
-    async ensureConversationExists(userId) {
-        try {
-            // Fetch conversation or create if it doesn't exist
-            const existingConversation = await this.$store.dispatch('fetchConversation', userId);
-            if (!existingConversation) {
-                const createdConversation = await this.$store.dispatch('createConversation', userId);
-                this.$store.commit('setConversationId', createdConversation.conversationId);
-            } else {
-                this.$store.commit('setConversationId', existingConversation.conversationId);
-            }
-            // Set showConversation to true to display the conversation
-            this.showConversation = true;
-        } catch (error) {
-            console.error('Error ensuring conversation exists:', error);
-        }
-    },
-
-        handleCloseConversation() {
-            this.selectedUser = null;
-            this.showConversation = false;
-        },
-        
-
-        goBack() {
-            this.$router.go(-1);
-        },
-        inputFocus() {
-            this.isInputFocused = true;
-        },
-        inputBlur() {
-            this.isInputFocused = false;
-        },
-    },
-    // async created() {
-    //     await this.$store.dispatch('fetchConversations'); // Fetch conversations when the component is created
+    // computed: {
+    //     ...mapState(['user']),
     // },
-    async mounted() {
-        await this.$store.dispatch('initializeApp');
-        this.$axios.get('/api/allusers')
-        .then(response => {
-            this.users = response.data;
-        })
-        .catch(error => {
-            console.error(error);
-        });
-    },
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -371,7 +428,7 @@ export default{
                 &:disabled{
                     color:#808080;
                 }
-                .person-conversation{
+                .person{
                     width:100%;
                     height:70px;
                     display:flex;
@@ -382,6 +439,38 @@ export default{
                     padding: 40px 20px;
                     cursor:pointer;
                     transition: all 0.3s;
+                    .user-info{
+                        display:flex;
+                        flex-direction:row;
+                        align-items: center;
+                        justify-content: flex-start;
+                        box-sizing: border-box;
+                        gap:10px;
+                        img{
+                            width:50px;
+                            height:50px;
+                            border-radius:50%;
+                            background-color: rgb(255, 255, 255);
+                        }
+                        .person-info{
+                            display:flex;
+                            flex-direction:column;
+                            align-items: flex-start;
+                            justify-content: flex-start;
+                            gap:5px;
+                            .username{
+                                color: black;
+                                font-weight: bold;
+                                font-size: 16px;
+                                margin:0;
+                            }
+                            .usertag{
+                                color: #6e767d;
+                                font-size: 14px;
+                                margin: 0;
+                            }
+                        }
+                    }
                 }
             }
         }
