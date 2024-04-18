@@ -166,6 +166,7 @@ class MessageController extends Controller
         $conversations = Conversation::where('user1_id', $userId)
             ->orWhere('user2_id', $userId)
             ->with(['user1', 'user2']) // Eager load both user1 and user2 relationships
+            ->orderBy('created_at', 'desc')
             ->get();
         
         return response()->json(['conversations' => $conversations]);
