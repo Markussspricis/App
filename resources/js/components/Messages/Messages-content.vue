@@ -42,13 +42,10 @@
                 <div class="conversations">
                     <div class="person" v-for="conversation in userConversations" :key="conversation.ConversationID" @click="openConversation(conversation)">
                         <div class="user-info">
-                            <!-- Choose either user1 or user2 based on the current user -->
-                            <img :src="'/storage/' + (conversation.user1.UserID !== currentUser.UserID ? conversation.user1.ProfilePicture : conversation.user2.ProfilePicture)" class="person-img">
+                            <img :src="'/storage/' + getUserProfilePicture(conversation)" class="person-img">
                             <div class="person-info">
-                                <!-- Choose either user1 or user2 based on the current user -->
-                                <p class="username">{{ conversation.user1.UserID !== currentUser.UserID ? conversation.user1.Name : conversation.user2.Name }}</p>
-                                <!-- Choose either user1 or user2 based on the current user -->
-                                <p class="usertag">{{ conversation.user1.UserID !== currentUser.UserID ? conversation.user1.UserTag : conversation.user2.UserTag }}</p>
+                                <p class="username">{{ getUserName(conversation) }}</p>
+                                <p class="usertag">{{ getUserTag(conversation) }}</p>
                             </div>
                         </div>
                     </div>
@@ -109,9 +106,11 @@ export default {
             try {
                 const response = await $axios.get('/user-conversations');
                 const conversations = response.data.conversations;
-                userConversations.value = conversations.filter(conversation =>
+                const filteredConversations = conversations.filter(conversation =>
                     conversation.user1.UserID === currentUser.value.UserID || conversation.user2.UserID === currentUser.value.UserID
                 );
+                userConversations.value = filteredConversations; // Update userConversations
+                console.log("User conversations:", userConversations.value);
             } catch (error) {
                 console.error("Error fetching user's conversations:", error);
             }
@@ -187,6 +186,30 @@ export default {
             isInputFocused.value = false;
         };
 
+        const getUserProfilePicture = (conversation) => {
+        if (conversation.user1 && conversation.user2) {
+            const currentUserID = currentUser.value.UserID;
+            return conversation.user1.UserID !== currentUserID ? conversation.user1.ProfilePicture : conversation.user2.ProfilePicture;
+        }
+        return ''; // Return a default profile picture or handle the case where user1 or user2 is missing
+        };
+
+        const getUserName = (conversation) => {
+            if (conversation.user1 && conversation.user2) {
+                const currentUserID = currentUser.value.UserID;
+                return conversation.user1.UserID !== currentUserID ? conversation.user1.Name : conversation.user2.Name;
+            }
+            return ''; // Return a default name or handle the case where user1 or user2 is missing
+        };
+
+        const getUserTag = (conversation) => {
+            if (conversation.user1 && conversation.user2) {
+                const currentUserID = currentUser.value.UserID;
+                return conversation.user1.UserID !== currentUserID ? conversation.user1.UserTag : conversation.user2.UserTag;
+            }
+            return ''; // Return a default user tag or handle the case where user1 or user2 is missing
+        };
+
         // Call the API to fetch users when component is mounted
         onMounted(async () => {
             try {
@@ -214,6 +237,10 @@ export default {
             $axios,
             openConversation,
             user: computed(() => store.state.user),
+            userConversations,
+            getUserProfilePicture,
+            getUserName,
+            getUserTag,
         };
     },
     // computed: {
