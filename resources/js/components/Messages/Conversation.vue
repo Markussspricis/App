@@ -174,6 +174,13 @@
             data: { deleteType, authenticatedUserID: authenticatedUser.UserID } // Pass the authenticated user ID
           });
 
+          if (deleteType === 'self') {
+            const index = this.messages.findIndex(message => message.MessageID === messageID);
+            if (index !== -1) {
+              this.messages.splice(index, 1);
+            }
+          }
+
           // Update UI or perform any other action after successful deletion
         } catch (error) {
           console.error("Error deleting message:", error);

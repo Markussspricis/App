@@ -79,19 +79,12 @@ class MessageController extends Controller
                 return response()->json(['message' => 'Message not found'], 404);
             }
 
-            // Validate authenticatedUserID
-            $request->validate([
-                'authenticatedUserID' => 'required|integer|min:1',
-            ]);
-
-            // Get authenticated user
             $authUser = Auth::user();
 
             if (!$authUser) {
                 return response()->json(['message' => 'User not authenticated'], 401);
             }
 
-            // Retrieve authenticated user ID from the request body
             $authenticatedUserID = $request->input('authenticatedUserID');
 
             if ($authUser->UserID != $authenticatedUserID) {
@@ -100,24 +93,18 @@ class MessageController extends Controller
 
             $deleteType = $request->input('deleteType', 'self');
 
-            // Retrieve authenticated user ID from the request body
-            // $authenticatedUserID = $request->input('authenticatedUserID');
-
             if ($deleteType === 'self') {
-                // Soft delete for both sent and received messages
-                $message->deleted_by = $authenticatedUserID; // Use authenticated user ID for deletion
-                $message->deleted_at = now();
-                $message->save();
-            } elseif ($deleteType === 'all') {
-                // Permanent delete for sent messages deleted by sender for all users
-                if ($message->SenderID == $authenticatedUserID) {
-                    $message->forceDelete(); // Permanent delete from database
-                } else {
-                    // Soft delete for received messages
-                    $message->deleted_by = $authenticatedUserID; // Use authenticated user ID for deletion
-                    $message->deleted_at = now();
+                if ($message->deleted_by === null) {
+                    $message->deleted_by = $authenticatedUserID;
+                    //$message->deleted_at = now();
                     $message->save();
+                } elseif ($message->deleted_by !== $authenticatedUserID) {
+                    // If the other user has already deleted the message, permanently delete it
+                    $message->forceDelete();
+                    return response()->json(['message' => 'Message deleted successfully', 'success' => true]);
                 }
+            } elseif ($deleteType === 'all') {
+                $message->forceDelete(); // Permanently delete the message from the database
             }
 
             return response()->json(['message' => 'Message deleted successfully', 'success' => true]);
@@ -125,7 +112,7 @@ class MessageController extends Controller
             return response()->json(['message' => 'Failed to delete message', 'error' => $e->getMessage()], 500);
         }
     }
-
+    
     public function checkConversation(Request $request, $userId)
     {
         $authUserId = Auth::id();
