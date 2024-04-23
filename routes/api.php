@@ -27,7 +27,7 @@ Route::middleware('auth:sanctum')->get('/get-user-tag/{tag}', [UserController::c
 Route::middleware('auth:sanctum')->get('/update-follower-count/{userID}', [UserController::class, 'updateFollowerCount']);
 
 Route::middleware('auth:sanctum')->post('/send-message', [MessageController::class, 'sendMessage']);
-Route::delete('/messages/{id}', [MessageController::class, 'deleteMessage']);
+Route::middleware('auth:sanctum')->delete('/messages/{id}', [MessageController::class, 'deleteMessage']);
 Route::middleware('auth:sanctum')->get('/check-conversation/{userId}', [MessageController::class, 'checkConversation']);
 Route::middleware('auth:sanctum')->get('/conversation/{userId}', [MessageController::class, 'getConversation']);
 Route::middleware('auth:sanctum')->post('/create-conversation', [MessageController::class, 'createConversation']);

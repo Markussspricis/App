@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 
 class MessageController extends Controller
 {
@@ -17,7 +18,6 @@ class MessageController extends Controller
     {
         $user = Auth::user();
 
-        // Fetch or create the conversation
         $conversation = Conversation::where(function ($query) use ($user, $request) {
             $query->where('user1_id', $user->UserID)
                 ->where('user2_id', $request->input('ReceiverID'));
@@ -26,22 +26,18 @@ class MessageController extends Controller
                 ->where('user2_id', $user->UserID);
         })->first();
 
-        // Ensure conversation exists
         if (!$conversation) {
-            // Create a new conversation if it doesn't exist
             $conversation = new Conversation();
             $conversation->user1_id = $user->UserID;
             $conversation->user2_id = $request->input('ReceiverID');
             $conversation->save();
         }
 
-        // Create a new message
         $message = new Messages();
         $message->SenderID = $user->UserID;
         $message->ReceiverID = $request->input('ReceiverID');
         $message->Content = $request->input('Content');
 
-        // Assign the conversation ID to the message
         $message->ConversationID = $conversation->ConversationID;
 
         if ($request->hasFile('image')) {
@@ -50,7 +46,6 @@ class MessageController extends Controller
             $message->Image = $path;
         }
 
-        // Save the message to the database
         $message->save();
 
         return response()->json(['success' => true, 'message' => 'Message sent successfully']);
@@ -75,24 +70,66 @@ class MessageController extends Controller
         }
     }
 
-    public function deleteMessage($id)
+    public function deleteMessage(Request $request, $id)
     {
-        $message = Messages::find($id);
+        try {
+            $message = Messages::find($id);
 
-        if (!$message) {
-            return response()->json(['message' => 'Message not found'], 404);
+            if (!$message) {
+                return response()->json(['message' => 'Message not found'], 404);
+            }
+
+            // Validate authenticatedUserID
+            $request->validate([
+                'authenticatedUserID' => 'required|integer|min:1',
+            ]);
+
+            // Get authenticated user
+            $authUser = Auth::user();
+
+            if (!$authUser) {
+                return response()->json(['message' => 'User not authenticated'], 401);
+            }
+
+            // Retrieve authenticated user ID from the request body
+            $authenticatedUserID = $request->input('authenticatedUserID');
+
+            if ($authUser->UserID != $authenticatedUserID) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $deleteType = $request->input('deleteType', 'self');
+
+            // Retrieve authenticated user ID from the request body
+            // $authenticatedUserID = $request->input('authenticatedUserID');
+
+            if ($deleteType === 'self') {
+                // Soft delete for both sent and received messages
+                $message->deleted_by = $authenticatedUserID; // Use authenticated user ID for deletion
+                $message->deleted_at = now();
+                $message->save();
+            } elseif ($deleteType === 'all') {
+                // Permanent delete for sent messages deleted by sender for all users
+                if ($message->SenderID == $authenticatedUserID) {
+                    $message->forceDelete(); // Permanent delete from database
+                } else {
+                    // Soft delete for received messages
+                    $message->deleted_by = $authenticatedUserID; // Use authenticated user ID for deletion
+                    $message->deleted_at = now();
+                    $message->save();
+                }
+            }
+
+            return response()->json(['message' => 'Message deleted successfully', 'success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to delete message', 'error' => $e->getMessage()], 500);
         }
-
-        $message->delete();
-
-        return response()->json(['message' => 'Message deleted successfully']);
     }
 
     public function checkConversation(Request $request, $userId)
     {
         $authUserId = Auth::id();
 
-        // Check if a conversation exists between the authenticated user and the specified user
         $conversation = Conversation::where(function ($query) use ($authUserId, $userId) {
             $query->where('user1_id', $authUserId)
                 ->where('user2_id', $userId);
@@ -111,7 +148,7 @@ class MessageController extends Controller
     public function getConversation(Request $request, $userId)
     {
         $authUserId = Auth::id();
-        // Check if a conversation exists between the authenticated user and the specified user
+    
         $conversation = Conversation::where(function ($query) use ($authUserId, $userId) {
             $query->where('user1_id', $authUserId)
                 ->where('user2_id', $userId);
@@ -124,7 +161,6 @@ class MessageController extends Controller
             return response()->json(['message' => 'Conversation not found'], 404);
         }
 
-        // If conversation exists, fetch associated messages
         $messages = Messages::where('ConversationID', $conversation->ConversationID)
                             ->with(['sender', 'receiver'])
                             ->orderBy('created_at')
@@ -134,11 +170,10 @@ class MessageController extends Controller
             return response()->json(['message' => 'No messages found in this conversation'], 404);
         }
 
-        // Augment each message with additional properties
         $now = Carbon::now();
         foreach ($messages as $message) {
             $message->time_ago = $this->formatTimeAgo($message->created_at, $now);
-            $message->type = ($message->SenderID == $authUserId) ? 'sent' : 'received'; // Use authenticated user for comparison
+            $message->type = ($message->SenderID == $authUserId) ? 'sent' : 'received';
         }
 
         return response()->json(['conversation' => $conversation, 'messages' => $messages]);
@@ -149,7 +184,6 @@ class MessageController extends Controller
         $authUserId = Auth::id();
         $userId = $request->input('userId');
 
-        // Create a new conversation
         $conversation = new Conversation();
         $conversation->user1_id = $authUserId;
         $conversation->user2_id = $userId;
@@ -162,14 +196,12 @@ class MessageController extends Controller
     {
         $userId = Auth::id();
         
-        // Fetch conversations for the authenticated user
         $conversations = Conversation::where('user1_id', $userId)
             ->orWhere('user2_id', $userId)
-            ->with(['user1', 'user2']) // Eager load both user1 and user2 relationships
+            ->with(['user1', 'user2'])
             ->orderBy('created_at', 'desc')
             ->get();
         
         return response()->json(['conversations' => $conversations]);
     }
-
 }

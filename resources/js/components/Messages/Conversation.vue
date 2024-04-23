@@ -20,7 +20,10 @@
           <div class="image">
             <img v-if="message.Image" :src="'/storage/' + message.Image" alt="Sent Image">
           </div>
-          <span class="time">{{ message.time_ago }}</span>
+          <div class="time">{{ message.time_ago }}</div>
+          <button class="delete-btn" @click.stop="TogglePopup('DeleteTrigger', message.MessageID)">
+            <ion-icon name="trash-bin-outline" class="delete-icon"></ion-icon>
+          </button>
         </div>
         <div v-else class="received">
           <div class="content">{{ message.Content }}</div>
@@ -28,6 +31,9 @@
             <img v-if="message.Image" :src="'/storage/' + message.Image" alt="Received Image">
           </div>
           <div class="time">{{ message.time_ago }}</div>
+          <button class="delete-btn" @click.stop="TogglePopup('DeleteTrigger2', message.MessageID)">
+            <ion-icon name="trash-bin-outline" class="delete-icon"></ion-icon>
+          </button>
         </div>
       </div>
     </div>
@@ -50,11 +56,38 @@
       </div>
     </div>
   </div>
+  <Popup v-if="popupTriggers.DeleteTrigger" :TogglePopup="() => TogglePopup(trigger, 'DeleteTrigger')">
+    <div class="delete-popup">
+      <h1 class="delete-title">Delete Message</h1>
+      <p class="tweet-p">Are you sure you want to delete this message?</p>
+      <div class="tweet-buttons">
+        <button class="cancel-button" @click="TogglePopup(trigger, 'DeleteTrigger')">Cancel</button>
+        <button class="delete-button" @click="deleteMessage(popupTriggers.DeleteTrigger, 'self')">Delete for me</button>
+        <button class="delete-button-2" @click="deleteMessage(popupTriggers.DeleteTrigger, 'all')">Delete for all</button>
+      </div>
+    </div>
+  </Popup>
+  <Popup v-if="popupTriggers.DeleteTrigger2" :TogglePopup="() => TogglePopup(trigger, 'DeleteTrigger2')">
+    <div class="delete-popup">
+      <h1 class="delete-title">Delete Message</h1>
+      <p class="tweet-p">Are you sure you want to delete this message?</p>
+      <div class="tweet-buttons">
+        <button class="cancel-button" @click="TogglePopup(trigger, 'DeleteTrigger2')">Cancel</button>
+        <button class="delete-button" @click="deleteMessage(popupTriggers.DeleteTrigger2, 'self')">Delete</button>
+      </div>
+    </div>
+  </Popup>
 </template>
   
 <script>
+  import { ref } from 'vue';
+  import Popup from '../Popup.vue';
+  import { useStore } from 'vuex';
   export default {
     name: 'Conversation',
+    components: {
+      Popup,
+    },
     data(){
       return{
         previewImagenav: null,
@@ -63,6 +96,33 @@
         loggedInUserID: null,
         isSendDisabled: true,
         messages: [],
+      }
+    },
+    setup() {
+      const popupTriggers = ref({});
+      const store = useStore();
+      const authenticatedUserID = ref(null);
+
+      const TogglePopup = (trigger, messageID) => {
+        popupTriggers.value.DeleteTrigger = false;
+        popupTriggers.value.DeleteTrigger2 = false;
+
+        if (trigger === 'DeleteTrigger') {
+          popupTriggers.value.DeleteTrigger = messageID;
+        } else if (trigger === 'DeleteTrigger2') {
+          popupTriggers.value.DeleteTrigger2 = messageID;
+        }
+      };
+
+      store.watch(() => store.state.user, (user) => {
+        // Update the authenticated user ID when the user object changes
+        authenticatedUserID.value = user ? user.UserID : null; // Assuming user object has an 'id' property
+      });
+
+      return {
+        popupTriggers,
+        TogglePopup,
+        authenticatedUserID,
       }
     },
     props: {
@@ -93,6 +153,30 @@
             });
         } catch (error) {
             console.error(error);
+        }
+      },
+      // Inside deleteMessage method
+      async deleteMessage(messageID, deleteType) {
+        try {
+          const authenticatedUser = this.$store.state.user; // Assuming the user object is stored in the Vuex state
+
+          console.log("Authenticated User:", authenticatedUser); // Log the authenticated user
+
+          // Validate authenticatedUserID
+          if (!authenticatedUser || typeof authenticatedUser.UserID !== 'number' || authenticatedUser.UserID <= 0) {
+            console.error("Invalid authenticated user ID");
+            return;
+          }
+
+          console.log("Delete Request Payload:", { deleteType, authenticatedUserID: authenticatedUser.UserID });
+          // Send delete request with authenticatedUserID
+          await this.$axios.delete(`/api/messages/${messageID}`, {
+            data: { deleteType, authenticatedUserID: authenticatedUser.UserID } // Pass the authenticated user ID
+          });
+
+          // Update UI or perform any other action after successful deletion
+        } catch (error) {
+          console.error("Error deleting message:", error);
         }
       },
       resetInputHeight() {
@@ -331,6 +415,27 @@
               // display: flex;
               // justify-content: flex-start;
             }
+            .delete-btn{
+              height:25px;
+              width:25px;
+              background:none;
+              border-radius:50%;
+              border:none;
+              display:flex;
+              justify-content: center;
+              align-items: center;
+              padding:0;
+              cursor:pointer;
+              .delete-icon{
+                font-size:16px;
+                color:#f11515;
+                --ionicon-stroke-width: 30px;
+                visibility: visible;
+              }
+              &:hover{
+                background-color: rgba($color: #f11515, $alpha: 0.1);
+              }
+            }
             .image{
               img{
                 max-width: 100%;
@@ -358,6 +463,27 @@
               color: gray;
               // display: flex;
               // justify-content: flex-start;
+            }
+            .delete-btn{
+              height:25px;
+              width:25px;
+              background:none;
+              border-radius:50%;
+              border:none;
+              display:flex;
+              justify-content: center;
+              align-items: center;
+              padding:0;
+              cursor:pointer;
+              .delete-icon{
+                font-size:16px;
+                color:#f11515;
+                --ionicon-stroke-width: 30px;
+                visibility: visible;
+              }
+              &:hover{
+                background-color: rgba($color: #f11515, $alpha: 0.1);
+              }
             }
             .image{
               img{
@@ -545,6 +671,69 @@
         }
       }
     }
+//     .delete-popup-2{
+//     display:flex;
+//     flex-direction:column;
+//     justify-content: center;
+//     width:500px;
+//     padding:60px 50px;
+//     gap:20px;
+//     margin-top:10px;
+//     box-sizing: border-box;
+//     z-index: 1000;
+//     .delete-title{
+//         color:black;
+//         font-size:30px;
+//         font-weight:600;
+//         margin:0;
+//     }
+//     .tweet-p{
+//         color: gray;
+//         margin-top: 0px;
+//     }
+//     .tweet-buttons{
+//         display: flex;
+//         flex-direction: row;
+//         justify-content: flex-end;
+//         .cancel-button{
+//             display: flex;
+//             margin-right: 10px;
+//             padding:10px 15px; 
+//             align-items: center;
+//             justify-content: center;
+//             text-align: center;
+//             border-radius: 50px;
+//             border:1px solid #6A6F74;
+//             background-color: rgba($color: #16181C, $alpha: 0.5);
+//             color:white;
+//             font-size:15px;
+//             font-weight: bold;
+//             transition:all 0.3s;
+//             cursor:pointer;
+//             &:hover{
+//                 background-color: rgba($color: #16181C, $alpha: 1);
+//             }
+//         }
+//         .delete-button{
+//             display: flex;
+//             padding:10px 15px; 
+//             align-items: center;
+//             justify-content: center;
+//             text-align: center;
+//             border-radius: 50px;
+//             border:1px solid #e42020;
+//             background-color: rgba($color: #e42020, $alpha: 0.1);
+//             color:#e42020;
+//             font-size:15px;
+//             font-weight: bold;
+//             transition:all 0.3s;
+//             cursor:pointer;
+//             &:hover{
+//                 background-color: rgba($color: #e42020, $alpha: 0.3);
+//             }
+//         }
+//     }
+// }
   //}
   // @media(max-width: 768px){
   //   .conversation{
