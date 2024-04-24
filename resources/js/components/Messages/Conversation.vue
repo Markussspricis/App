@@ -175,10 +175,20 @@
           });
 
           if (deleteType === 'self') {
+            // Remove the message from the UI immediately
             const index = this.messages.findIndex(message => message.MessageID === messageID);
             if (index !== -1) {
               this.messages.splice(index, 1);
             }
+            // Close the popup after deleting a self-type message
+            this.TogglePopup();
+          } else if (deleteType === 'all') {
+            const index = this.messages.findIndex(message => message.MessageID === messageID);
+            if (index !== -1) {
+              this.messages.splice(index, 1);
+            }
+            // Close the popup after deleting for all types of messages
+            this.TogglePopup();
           }
 
           // Update UI or perform any other action after successful deletion

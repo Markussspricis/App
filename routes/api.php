@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->get('/check-conversation/{userId}', [MessageC
 Route::middleware('auth:sanctum')->get('/conversation/{userId}', [MessageController::class, 'getConversation']);
 Route::middleware('auth:sanctum')->post('/create-conversation', [MessageController::class, 'createConversation']);
 Route::middleware('auth:sanctum')->get('/user-conversations', [MessageController::class, 'getUserConversations']);
+Route::middleware('auth:sanctum')->delete('/conversation/{conversationId}', [MessageController::class, 'deleteConversation']);
 
 Route::middleware('auth:sanctum')->post('tweets', [TweetController::class, 'createTweet']);
 Route::middleware('auth:sanctum')->get('/tweet_type/{type}/{page}', [TweetController::class, 'getTweets']);

@@ -44,17 +44,31 @@
                                 <p class="usertag">{{ getUserTag(conversation) }}</p>
                             </div>
                         </div>
+                        <button class="delete-btn" @click.stop="setConversationToDelete(conversation)">
+                            <ion-icon name="trash-bin-outline" class="delete-icon"></ion-icon>
+                        </button>
                     </div>
                 </div>
                 <Conversation v-if="showConversation" :user="selectedUser" @closeConversation="handleCloseConversation"/>
             </div>
         </div>
     </div>
+    <Popup v-if="popupTriggers.DeleteTrigger" :TogglePopup="() => TogglePopup('DeleteTrigger')">
+        <div class="delete-popup">
+            <h1 class="delete-title">Delete Conversation</h1>
+            <p class="tweet-p">Are you sure you want to delete this conversation?</p>
+            <div class="tweet-buttons">
+                <button class="cancel-button" @click="TogglePopup('DeleteTrigger')">Cancel</button>
+                <button class="delete-button" @click="deleteConversation">Delete</button>
+            </div>
+        </div>
+    </Popup>
 </template>
 
 <script>
     import { ref, computed, onMounted } from 'vue';
     import Conversation from './Conversation.vue';
+    import Popup from '../Popup.vue';
     import { useStore } from 'vuex';
     import axios from 'axios';
 
@@ -62,6 +76,7 @@
         name: 'MessagesContent',
         components: {
             Conversation,
+            Popup,
         },
         setup() {
             const $axios = axios.create({ baseURL: '/api/' });
@@ -74,6 +89,33 @@
             const isInputFocused = ref(false);
             const store = useStore();
             const currentUser = computed(() => store.state.user);
+            const popupTriggers = ref({});
+            const conversationToDelete = ref(null);
+
+            const TogglePopup = (trigger) => {
+                popupTriggers.value[trigger] = !popupTriggers.value[trigger];
+            };
+
+            const setConversationToDelete = (conversation) => {
+                conversationToDelete.value = conversation;
+                if (conversation) {
+                    TogglePopup('DeleteTrigger');
+                } else {
+                    console.error('Conversation is null or undefined');
+                }
+            };
+
+            const deleteConversation = async () => {
+                try {
+                    const conversationId = conversationToDelete.value.ConversationID;
+                    await $axios.delete(`/conversation/${conversationId}`);
+                    fetchUserConversations(currentUser);
+                    conversationToDelete.value = null;
+                    TogglePopup('DeleteTrigger');
+                } catch (error) {
+                    console.error('Error deleting conversation:', error);
+                }
+            };
 
             const foundUsers = computed(() => {
                 if (searchInput.value.length > 0) {
@@ -246,6 +288,10 @@
                 getUserProfilePicture,
                 getUserName,
                 getUserTag,
+                popupTriggers,
+                TogglePopup,
+                setConversationToDelete,
+                deleteConversation,
             };
         },
     };
@@ -498,6 +544,27 @@
                                     font-size: 14px;
                                     margin: 0;
                                 }
+                            }
+                        }
+                        .delete-btn{
+                            height:25px;
+                            width:25px;
+                            background:none;
+                            border-radius:50%;
+                            border:none;
+                            display:flex;
+                            justify-content: center;
+                            align-items: center;
+                            padding:0;
+                            cursor:pointer;
+                            .delete-icon{
+                                font-size:16px;
+                                color:#f11515;
+                                --ionicon-stroke-width: 30px;
+                                visibility: visible;
+                            }
+                            &:hover{
+                                background-color: rgba($color: #f11515, $alpha: 0.1);
                             }
                         }
                     }

@@ -4,13 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Messages;
-use App\Models\User;
 use App\Models\Conversation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\QueryException;
 
 class MessageController extends Controller
 {
@@ -99,12 +96,11 @@ class MessageController extends Controller
                     //$message->deleted_at = now();
                     $message->save();
                 } elseif ($message->deleted_by !== $authenticatedUserID) {
-                    // If the other user has already deleted the message, permanently delete it
                     $message->forceDelete();
                     return response()->json(['message' => 'Message deleted successfully', 'success' => true]);
                 }
             } elseif ($deleteType === 'all') {
-                $message->forceDelete(); // Permanently delete the message from the database
+                $message->forceDelete();
             }
 
             return response()->json(['message' => 'Message deleted successfully', 'success' => true]);
@@ -190,5 +186,32 @@ class MessageController extends Controller
             ->get();
         
         return response()->json(['conversations' => $conversations]);
+    }
+
+    public function deleteConversation(Request $request, $conversationId)
+    {
+        try {
+            $conversation = Conversation::findOrFail($conversationId);
+
+            $authUser = Auth::user();
+            if (!$authUser) {
+                return response()->json(['message' => 'User not authenticated'], 401);
+            }
+            if ($conversation->user1_id != $authUser->UserID && $conversation->user2_id != $authUser->UserID) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $deletedMessagesCount = $conversation->messages()->delete();
+
+            \Log::info('Deleted ' . $deletedMessagesCount . ' messages for conversation ID: ' . $conversationId);
+
+            $conversation->delete();
+
+            return response()->json(['message' => 'Conversation deleted successfully', 'success' => true]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to delete conversation: ' . $e->getMessage());
+
+            return response()->json(['message' => 'Failed to delete conversation', 'error' => $e->getMessage()], 500);
+        }
     }
 }
