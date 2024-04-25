@@ -47,8 +47,8 @@
                         <button class="delete-btn" @click.stop="setConversationToDelete(conversation)">
                             <ion-icon name="trash-bin-outline" class="delete-icon"></ion-icon>
                         </button>
-                        <div>
-                            <div class="message-count" v-if="conversation.unreadCount > 0" @click.stop="markConversationAsRead(conversation)">{{ conversation.unreadCount }}</div>
+                        <div v-if="conversation.unreadCount > 0">
+                            <div class="message-count" @click.stop="markConversationAsRead(conversation)">{{ conversation.unreadCount }}</div>
                         </div>
                     </div>
                 </div>
