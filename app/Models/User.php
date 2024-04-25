@@ -78,6 +78,11 @@ class User extends Authenticatable
         return $this->hasMany(Messages::class, 'ReceiverID');
     }
 
+    // public function unreadMessages()
+    // {
+    //     return $this->hasMany(Messages::class, 'ReceiverID');
+    // }
+
     public function notificationsSent()
     {
         return $this->hasMany(Notification::class, 'SenderID');

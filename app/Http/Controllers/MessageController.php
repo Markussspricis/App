@@ -214,4 +214,46 @@ class MessageController extends Controller
             return response()->json(['message' => 'Failed to delete conversation', 'error' => $e->getMessage()], 500);
         }
     }
+
+    public function getUnreadMessagesCount()
+    {
+        $user = Auth::user();
+        $unreadCount = $user->messagesReceived()->count();
+        if ($unreadCount > 9) {
+            $unreadCount = '9+';
+        }
+
+        return response()->json(['unreadCount' => $unreadCount]);
+    }
+
+    public function getUnreadMessageCount($conversationId)
+    {
+        $user = Auth::user();
+        
+        // Fetch and return the updated unread count
+        $unreadCount = $user->messagesReceived()
+            ->where('ConversationID', $conversationId)
+            ->where('Read', false)
+            ->count();
+
+        return response()->json(['unreadCount' => $unreadCount]);
+    }
+
+    public function markConversationAsRead($conversationId)
+    {
+        $user = Auth::user();
+
+        // Update the Read status of messages in the conversation
+        $user->messagesReceived()
+            ->where('ConversationID', $conversationId)
+            ->update(['Read' => true]);
+
+        // Fetch and return the updated unread count
+        $unreadCount = $user->messagesReceived()
+            ->where('ConversationID', $conversationId)
+            ->where('Read', false)
+            ->count();
+
+        return response()->json(['updatedUnreadCount' => $unreadCount]);
+    }
 }

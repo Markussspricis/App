@@ -24,7 +24,12 @@
 
             <button class="Messages" :class="{ 'active': activeRoute === '/messages' }" @click="$router.push('/messages')">
                 <div class="button-content">
-                    <ion-icon class="button-icon" :name="isMessagesFilled ? 'mail' : 'mail-outline'"></ion-icon>
+
+                    <div class="icon-container">
+                        <ion-icon class="button-icon" :name="isMessagesFilled ? 'mail' : 'mail-outline'"></ion-icon>
+                        <div class="messages-count" v-if="unreadMessagesCount">{{ unreadMessagesCount }}</div>
+                    </div>
+
                     <span class="button-text">Messages</span>
                 </div>
             </button>
@@ -173,6 +178,8 @@
                 isBookmarksFilled: false,
                 isProfileFilled: false,
                 unreadNotificationsCount: '',
+
+                unreadMessagesCount: '',
             }
         },
         setup(){
@@ -348,7 +355,17 @@
                 .catch(error => {
                     console.error(error);
                 })
-            }
+            },
+
+            getUnreadMessagesCount() {
+            axios.get('/api/get-unread-messages-count')
+                .then(response => {
+                    this.unreadMessagesCount = response.data.unreadCount;
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+            },
         },
             
         async mounted() {
@@ -369,19 +386,26 @@
                 this.isProfileFilled = this.activeRoute.includes('/profile');
             });
 
-            if (this.$route.name !== 'Index') {
+            if (this.$route.name != 'Index' && this.$route.name != 'Register' && this.$route.name != 'Login' && this.$route.name != 'UpdatePassword') {
                 // this.getAllUsersMention();
                 this.unreadNotificationsIntervalId = setInterval(
                     this.getUnreadNotificationCount,
-                    2000
+                    10000
                 );
+            }
+            if (this.$route.name != 'Index' && this.$route.name != 'Register' && this.$route.name != 'Login' && this.$route.name != 'UpdatePassword') {
+                // this.getAllUsersMention();
+                this.unreadMessagesIntervalId = setInterval(
+                    this.getUnreadMessagesCount,
+                    10000
+                )
             }
         },
         beforeDestroy() {
-            clearInterval(this.unreadNotificationsIntervalId);
+            clearInterval(this.unreadNotificationsIntervalId && this.unreadMessagesIntervalId);
         },
         beforeUnmount() {
-            clearInterval(this.unreadNotificationsIntervalId);
+            clearInterval(this.unreadNotificationsIntervalId && this.unreadMessagesIntervalId);
         },
     }
 </script>
@@ -452,6 +476,27 @@
                 width:auto;
                 height:auto;
                 .notification-count{
+                    position:absolute;
+                    bottom:0px;
+                    right:-4px;
+                    background-color: #1da1f2;
+                    border-radius: 50%;
+                    font-size:12px;
+                    width:16px;
+                    height:16px;
+                    color:white;
+                    display:flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+            }
+        }
+        .Messages{
+            .icon-container{
+                position:relative;
+                width:auto;
+                height:auto;
+                .messages-count{
                     position:absolute;
                     bottom:0px;
                     right:-4px;
@@ -589,11 +634,15 @@
         .button-content{
             color: #1da1f2;
             .icon-container{
-            .notification-count{
-                background-color: white;
-                color:#1da1f2;
+                .notification-count{
+                    background-color: white;
+                    color:#1da1f2;
+                }
+                .messages-count{
+                    background-color: white;
+                    color:#1da1f2;
+                }
             }
-        }
         }
     }
     @media (max-width: 1250px) {

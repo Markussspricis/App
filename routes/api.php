@@ -33,6 +33,9 @@ Route::middleware('auth:sanctum')->get('/conversation/{userId}', [MessageControl
 Route::middleware('auth:sanctum')->post('/create-conversation', [MessageController::class, 'createConversation']);
 Route::middleware('auth:sanctum')->get('/user-conversations', [MessageController::class, 'getUserConversations']);
 Route::middleware('auth:sanctum')->delete('/conversation/{conversationId}', [MessageController::class, 'deleteConversation']);
+Route::middleware('auth:sanctum')->get('/get-unread-messages-count', [MessageController::class, 'getUnreadMessagesCount']);
+Route::middleware('auth:sanctum')->get('/conversation/{conversationId}/unread-count', [MessageController::class, 'getUnreadMessageCount']);
+Route::middleware('auth:sanctum')->post('/conversation/{conversationId}/mark-as-read', [MessageController::class, 'markConversationAsRead']);
 
 Route::middleware('auth:sanctum')->post('tweets', [TweetController::class, 'createTweet']);
 Route::middleware('auth:sanctum')->get('/tweet_type/{type}/{page}', [TweetController::class, 'getTweets']);

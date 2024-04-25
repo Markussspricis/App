@@ -47,6 +47,9 @@
                         <button class="delete-btn" @click.stop="setConversationToDelete(conversation)">
                             <ion-icon name="trash-bin-outline" class="delete-icon"></ion-icon>
                         </button>
+                        <div>
+                            <div class="message-count" v-if="conversation.unreadCount > 0" @click.stop="markConversationAsRead(conversation)">{{ conversation.unreadCount }}</div>
+                        </div>
                     </div>
                 </div>
                 <Conversation v-if="showConversation" :user="selectedUser" @closeConversation="handleCloseConversation"/>
@@ -147,6 +150,13 @@
                     const filteredConversations = conversations.filter(conversation =>
                         conversation.user1.UserID === currentUser.value.UserID || conversation.user2.UserID === currentUser.value.UserID
                     );
+
+                    // Fetch unread message count for each conversation
+                    await Promise.all(filteredConversations.map(async conversation => {
+                        const response = await $axios.get(`/conversation/${conversation.ConversationID}/unread-count`);
+                        conversation.unreadCount = response.data.unreadCount;
+                    }));
+
                     userConversations.value = filteredConversations;
                     console.log("User conversations:", userConversations.value);
                 } catch (error) {
@@ -177,14 +187,35 @@
                         const response = await $axios.get(`/check-conversation/${selectedUser.value.UserID}`);
                         if (response.data.conversationExists) {
                             await fetchConversation(selectedUser.value.UserID);
+                            await markConversationAsRead(selectedUser.value.ConversationID);
                         } else {
                             await createConversation(selectedUser.value.UserID);
+                        }
+                    } else if (conversation) {
+                        await markConversationAsRead(conversation.ConversationID);
+                        conversation.unreadCount = 0;
+
+                        // Update unread count in the userConversations array
+                        const conversationIndex = userConversations.value.findIndex(conv => conv.ConversationID === conversation.ConversationID);
+                        if (conversationIndex !== -1) {
+                            userConversations.value[conversationIndex].unreadCount = 0;
                         }
                     }
 
                     showConversation.value = true;
+
                 } catch (error) {
                     console.error(error);
+                }
+            };
+
+            const markConversationAsRead = async (conversationId) => {
+                try {
+                    const response = await $axios.post(`/conversation/${conversationId}/mark-as-read`);
+                    const updatedUnreadCount = response.data.updatedUnreadCount;
+
+                } catch (error) {
+                    console.error('Error marking conversation as read:', error);
                 }
             };
 
@@ -566,6 +597,19 @@
                             &:hover{
                                 background-color: rgba($color: #f11515, $alpha: 0.1);
                             }
+                        }
+                        .message-count{
+                            background-color: #1da1f2;
+                            font-size:18px;
+                            border-radius:50px;
+                            right:5px;
+                            min-width:30px;
+                            max-width:60px;
+                            height:30px;
+                            color:white;
+                            display:flex;
+                            align-items: center;
+                            justify-content: center;
                         }
                     }
                 }
