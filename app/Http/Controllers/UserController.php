@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Messages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -41,9 +40,8 @@ class UserController extends Controller
         $user = User::where('Email', $request->Email)->first();
 
         if ($user) {
-            // Check the password
             if (Hash::check($request->Password, $user->Password)) {
-                $token = $user->createToken('authToken')->plainTextToken; // Create and get the user token
+                $token = $user->createToken('authToken')->plainTextToken;
                 $user->token = $token;
 
                 $success = true;
@@ -94,7 +92,7 @@ class UserController extends Controller
 
                     $success = true;
                     $message = 'User created successfully';
-                    $token = $user->createToken('authToken')->plainTextToken; // Create and get the user token
+                    $token = $user->createToken('authToken')->plainTextToken;
                     $user->token = $token;
                 }
             }
@@ -113,7 +111,6 @@ class UserController extends Controller
 
     public function resetPassword(Request $request)
     {
-        // Validate the input data (email and new password)
         $request->validate([
             'email' => 'required|email',
             'newPassword' => 'required|min:8',
@@ -122,17 +119,14 @@ class UserController extends Controller
         $email = $request->input('email');
         $newPassword = $request->input('newPassword');
 
-        // Find the user by their email
         $user = User::where('email', $email)->first();
 
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        // Hash the new password securely
         $hashedPassword = Hash::make($newPassword);
 
-        // Update the user's password in the database
         $user->password = $hashedPassword;
         $user->save();
 
@@ -142,7 +136,7 @@ class UserController extends Controller
     public function logout(Request $request)
     {
         try {
-            $request->user()->tokens()->delete(); // Revoke user tokens
+            $request->user()->tokens()->delete();
             $success = true;
             $message = 'User logged out successfully';
         } catch (\Exception $ex) {
@@ -165,6 +159,7 @@ class UserController extends Controller
         ];
         return response()->json($updatedFollowCount);
     }
+
     public function getUserById($id)
     {
         if (auth()->check()) {
@@ -213,6 +208,7 @@ class UserController extends Controller
     {
        return Auth::user();
     }
+
     public function updateProfile(Request $request)
     {
         $user = auth()->user();
@@ -243,16 +239,18 @@ class UserController extends Controller
         if ($newProfilePicture) {
             $image = $request->file('profile_picture');
             $path = $image->store('profile_pictures', 'public');
-            if ($user->ProfilePicture) {
+            
+            if ($user->ProfilePicture && $user->ProfilePicture !== 'profile_pictures/DefaultPFP.jpeg') {
                 $imagePath = public_path('storage/' . $user->ProfilePicture);
     
                 if (File::exists($imagePath)) {
                     File::delete($imagePath);
-                    Log::info('Image deleted: ' . $imagePath); // Log the image deletion
+                    Log::info('Image deleted: ' . $imagePath);
                 } else {
-                    Log::info('Image not found: ' . $imagePath); // Log if the image was not found
+                    Log::info('Image not found: ' . $imagePath);
                 }
             }
+    
             $user->ProfilePicture = $path;
             $messages[] = 'Profile picture uploaded successfully';
         }
@@ -264,9 +262,9 @@ class UserController extends Controller
     
                 if (File::exists($imagePath)) {
                     File::delete($imagePath);
-                    Log::info('Image deleted: ' . $imagePath); // Log the image deletion
+                    Log::info('Image deleted: ' . $imagePath);
                 } else {
-                    Log::info('Image not found: ' . $imagePath); // Log if the image was not found
+                    Log::info('Image not found: ' . $imagePath);
                 }
             }
             $user->Banner = $path;

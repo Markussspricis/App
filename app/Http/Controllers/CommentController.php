@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\Comment;
 use App\Models\Tweet;
-use App\Models\User;
 use App\Models\Notification;
 
 class CommentController extends Controller
@@ -25,45 +24,10 @@ class CommentController extends Controller
             $commentText = $request->input('commentText');
             if ($request->has('commentText')) {
                 $comment->CommentText = $request->input('commentText');
-                // $mentions = $this->extractMentions($comment->CommentText);
             }
-    
-/*             if ($request->hasFile('commentImage')) {
-                $image = $request->file('commentImage');
-                $path = $image->store('comment_pictures', 'public');
-                $comment->CommentImage = $path;
-            } */
             $comment->UserID = $user->UserID;
             $comment->TweetID = $tweet->TweetID;
             $tweet->comments()->save($comment);
-            // if (!empty($mentions)) {
-            //     foreach ($mentions as $mention) {
-            //         $mentionModel = new CommentMention([
-            //             'MentionedUserID' => $mention->UserID,
-            //             'UserID' => $user->UserID,
-            //         ]);
-            //         $comment->comment_mentions()->save($mentionModel);
-            //         if ($mention->UserID != $user->UserID) {
-            //             $existingMentionNotification = Notification::where('SenderID', $user->UserID)
-            //                 ->where('ReceiverID', $mention->UserID)
-            //                 ->where('NotificationType', 'mention')
-            //                 ->where('NotificationLink', '/tweet/' . $tweet->TweetID)
-            //                 ->where('created_at', '>=', Carbon::now()->subMinutes(0.2))
-            //                 ->first();
-            //             if (!$existingMentionNotification) {
-            //                 $mentionnotifcation = new Notification([
-            //                     'SenderID' => $user->UserID,
-            //                     'ReceiverID' => $mention->UserID,
-            //                     'NotificationType' => 'mention',
-            //                     'NotificationText' => ' mentioned you in a comment',
-            //                     'NotificationLink' => '/tweet/' . $tweet->TweetID,
-            //                     'Read' => false,
-            //                 ]);
-            //                 $mentionnotifcation->save();
-            //             }
-            //         }
-            //     }
-            // }
             if ($tweet->UserID != $user->UserID){
                 $existingCommentNotification = Notification::where('SenderID', $user->UserID)
                     ->where('ReceiverID', $tweet->UserID)
@@ -76,7 +40,7 @@ class CommentController extends Controller
                         'SenderID' => $user->UserID,
                         'ReceiverID' => $tweet->UserID,
                         'NotificationType' => 'comment',
-                        'NotificationText' => ' commented on your tweet',
+                        'NotificationText' => ' commented on your post',
                         'NotificationLink' => '/tweet/' . $tweet->TweetID,
                         'Read' => false,
                     ]);
@@ -91,24 +55,12 @@ class CommentController extends Controller
         }
     }
 
-    // private function extractMentions($Text)
-    // {
-    //     preg_match_all('/@(\w+)/u', $Text, $matches);
-    
-    //     $usernames = $matches[1];
-    //     $usernamesWithAtSymbol = array_map(function ($username) {
-    //         return '@' . $username;
-    //     }, $usernames);
-    //     return User::whereIn('UserTag', $usernamesWithAtSymbol)->get();
-    // }
-
     public function deleteComment($id)
     {
         $comment = Comment::find($id);
         if (!$comment) {
             return response()->json(['message' => 'Comment not found'], 404);
         }
-        // $comment->comment_mentions()->delete();
         $comment->delete();
         return response()->json(['message' => 'Comment deleted successfully']);
     }
@@ -126,6 +78,7 @@ class CommentController extends Controller
         }
         return response()->json(['comments' => $comments]);
     }
+    
     private function formatTimeAgo($created_at, $now)
     {
         $diff = $created_at->diff($now);

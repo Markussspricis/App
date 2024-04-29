@@ -18,9 +18,6 @@ class TweetController extends Controller
     
             if ($request->has('tweetText')) {
                 $tweet->TweetText = $request->input('tweetText');
-    
-                // Parse mentions and store them in the database
-                // $mentions = $this->extractMentions($tweet->TweetText);
             }
     
             if ($request->hasFile('tweetImage')) {
@@ -30,33 +27,7 @@ class TweetController extends Controller
             }
 
             $user->tweets()->save($tweet);
-            // if (!empty($mentions)) {
-            //     foreach ($mentions as $mention) {
-            //         $mentionModel = new Mention([
-            //             'MentionedUserID' => $mention->UserID,
-            //             'UserID' => $user->UserID,
-            //         ]);
-            //         $tweet->mentions()->save($mentionModel);
-            //         if ($mention->UserID != $user->UserID){
-            //             $existingNotification = Notification::where('SenderID', $user->UserID)
-            //                 ->where('ReceiverID', $mention->UserID)
-            //                 ->where('NotificationType', 'mention')
-            //                 ->where('created_at', '>=', now()->subMinutes(0.2))
-            //                 ->first();
-            //             if (!$existingNotification) {
-            //                 $notification = new Notification([
-            //                     'SenderID' => $user->UserID,
-            //                     'ReceiverID' => $mention->UserID,
-            //                     'NotificationType' => 'mention',
-            //                     'NotificationText' => ' mentioned you in a tweet',
-            //                     'NotificationLink' => '/tweet/' . $tweet->TweetID,
-            //                     'Read' => false,
-            //                 ]);
-            //                 $notification->save();
-            //             }
-            //         }
-            //     }
-            // }
+    
             $tweet->user = $user;
             $tweet->created_ago = 'now';
             $tweet->like_count = 0;
@@ -71,6 +42,7 @@ class TweetController extends Controller
             return response()->json(['error' => 'User not authenticated.'], 401);
         }
     }
+
     public function updateTweetStats(Request $request)
     {
         $tweetIds = $request->input('tweetIds', []);
@@ -91,10 +63,11 @@ class TweetController extends Controller
     
         return response()->json($updatedStats);
     }
+
     public function getNewTweetCount($type)
     {
         $user = auth()->user();
-        $lastCheckedAt = now()->subSeconds(10); // Assuming last checked time is 10 seconds ago
+        $lastCheckedAt = now()->subSeconds(10);
 
         $newTweets = Tweet::where('created_at', '>', $lastCheckedAt)
             ->where('UserID', '!=', $user->UserID)
@@ -109,7 +82,8 @@ class TweetController extends Controller
             ->get();
         $following_tweetIDs = $newFollowingTweets->pluck('TweetID');
         return response()->json(['tweetIDs' => $tweetIDs, 'following_tweetIDs' => $following_tweetIDs]);
-    } 
+    }
+
     public function loadNewTweets(Request $request)
     {
         $Ids = $request->input('Ids');
@@ -140,16 +114,7 @@ class TweetController extends Controller
         }
         return response()->json(['newTweets' => $newTweets]);
     }
-    // private function extractMentions($tweetText)
-    // {
-    //     preg_match_all('/@(\w+)/u', $tweetText, $matches);
-    
-    //     $usernames = $matches[1];
-    //     $usernamesWithAtSymbol = array_map(function ($username) {
-    //         return '@' . $username;
-    //     }, $usernames);
-    //     return User::whereIn('UserTag', $usernamesWithAtSymbol)->get();
-    // }
+
     public function getTweets($type, $page)
     {
         if (auth()->check()) {
@@ -205,10 +170,10 @@ class TweetController extends Controller
     
             return response()->json(['tweets' => $tweets, 'total_pages' => $totalPages]);
         } else {
-            // Handle the case where the user is not authenticated.
             return response()->json(['error' => 'User not authenticated.'], 401);
         }
     }
+
     public function getUserTweetsByType($userTag, $type, $page)
     {
         if (auth()->check()) {
@@ -241,10 +206,10 @@ class TweetController extends Controller
 
             return $tweets;
         } else {
-            // Handle the case where the user is not authenticated.
             return response()->json(['error' => 'User not authenticated.'], 401);
         }
     }
+
     public function getUserLikedTweets($userID, $page)
     {
         if (auth()->check()) {
@@ -290,17 +255,17 @@ class TweetController extends Controller
     
             return response()->json(['tweets' => $tweets, 'liked_tweet_count' => $liked_tweet_count, 'total_pages' => $totalPages]);
         } else {
-            // Handle the case where the user is not authenticated.
             return response()->json(['error' => 'User not authenticated.'], 401);
         }
     }
+
     public function getUserCommentedTweets($userID, $user2, $page)
     {
         if (auth()->check()) {
             $user = auth()->user();
     
             $tweets = Tweet::with(['user', 'comments' => function ($query) use ($userID) {
-                $query->where('UserID', $userID)->orderBy('created_at', 'desc');;
+                $query->where('UserID', $userID)->orderBy('created_at', 'desc');
             }])
             ->whereHas('comments', function ($query) use ($userID) {
                 $query->where('UserID', $userID);
@@ -344,6 +309,7 @@ class TweetController extends Controller
             return response()->json(['error' => 'User not authenticated.'], 401);
         }
     }
+
     public function getUserTweets($userID, $user2, $page)
     {
         if (auth()->check()) {
@@ -363,7 +329,7 @@ class TweetController extends Controller
                     $query->from('retweets')
                         ->selectRaw('COUNT(*)')
                         ->whereColumn('retweets.TweetID', 'tweets.TweetID')
-                        ->where('retweets.UserID', $user2->UserID); // Count the retweets by user2
+                        ->where('retweets.UserID', $user2->UserID);
                 }, 'isRetweet')
                 ->selectSub(function ($query) {
                     $query->from('comments')
@@ -397,10 +363,10 @@ class TweetController extends Controller
     
             return response()->json(['tweets' => $tweets, 'tweet_count' => $tweet_count, 'total_pages' => $totalPages]);
         } else {
-            // Handle the case where the user is not authenticated.
             return response()->json(['error' => 'User not authenticated.'], 401);
         }
     }
+
     private function formatTimeAgo($created_at, $now)
     {
         $diff = $created_at->diff($now);
@@ -419,6 +385,7 @@ class TweetController extends Controller
             return $diff->s . 's';
         }
     }
+
     public function deleteTweet($id)
     {
         $tweet = Tweet::find($id);
@@ -430,18 +397,17 @@ class TweetController extends Controller
         $comments = $tweet->comments()->get();
     
         foreach ($comments as $comment) {
-            // $comment->comment_mentions()->delete();
             $comment->delete();
         }
     
         $tweet->likes()->delete();
         $tweet->retweets()->delete();
         $tweet->bookmarks()->delete();
-        // $tweet->mentions()->delete();
         $tweet->delete();
     
         return response()->json(['message' => 'Tweet deleted successfully']);
     }
+
     public function getTweetData($id)
     {
         $tweet = Tweet::with('user')
@@ -466,7 +432,6 @@ class TweetController extends Controller
         if (!$tweet) {
             return response()->json(['message' => 'Tweet not found'], 404);
         }
-            // Check if the user is authenticated
         $user = auth()->user();
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
@@ -477,14 +442,17 @@ class TweetController extends Controller
         }
         return response()->json(['tweet' => $tweet]);
     }
+
     private function checkIfLikedByUser($tweet, $user)
     {
         return $tweet->likes->contains('UserID', $user->UserID);
     }
+
     private function checkIfRetweetedByUser($tweet, $user)
     {
         return $tweet->retweets->contains('UserID', $user->UserID);
     }
+
     private function checkIfBookmarkedByUser($tweet, $user)
     {
         return $tweet->bookmarks->contains('UserID', $user->UserID);

@@ -11,14 +11,8 @@ class BookmarkController extends Controller
 {
     public function createBookmark(Request $request)
     {
-
         $user = Auth::user();
         $tweetId = $request->input('tweetId');
-
-        // $data = $request->validate([
-        //     'UserID' => 'required',
-        //     'TweetID' => 'required',
-        // ]);
 
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
@@ -29,10 +23,6 @@ class BookmarkController extends Controller
         if (!$tweet) {
             return response()->json(['message' => 'Tweet not found'], 404);
         }
-
-        // $bookmark = Bookmark::create($data);
-
-        // return response()->json($bookmark, 201);
 
         $existingBookmark = Bookmark::where('UserID', $user->UserID)
             ->where('TweetID', $tweet->TweetID)
@@ -52,7 +42,6 @@ class BookmarkController extends Controller
 
     public function removeBookmark($tweetId)
     {
-        // $bookmark = Bookmark::find($bookmarkID);
         $user = Auth::user();
         $tweet = Tweet::find($tweetId);
 
@@ -65,8 +54,8 @@ class BookmarkController extends Controller
         }
 
         $existingBookmark = Bookmark::where('UserID', $user->UserID)
-        ->where('TweetID', $tweet->TweetID)
-        ->first();
+            ->where('TweetID', $tweet->TweetID)
+            ->first();
 
         if (!$existingBookmark) {
             return response()->json(['message' => 'You have not bookmarked this tweet'], 400);
@@ -74,7 +63,6 @@ class BookmarkController extends Controller
 
         $existingBookmark->delete();
 
-        // return response()->json(null, 204);
         return response()->json(['message' => 'Unbookmarked successfully']);
     }
 }

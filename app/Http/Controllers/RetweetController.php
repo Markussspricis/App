@@ -49,7 +49,7 @@ class RetweetController extends Controller
                     'SenderID' => $user->UserID,
                     'ReceiverID' => $tweet->UserID,
                     'NotificationType' => 'retweet',
-                    'NotificationText' => ' retweeted your tweet',
+                    'NotificationText' => ' reposted your post',
                     'NotificationLink' => '/tweet/' . $tweet->TweetID,
                     'Read' => false,
                 ]);

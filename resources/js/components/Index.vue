@@ -94,9 +94,9 @@
             width:100%;
             height:45px;
             border-radius: 50px;
-            border:none;
-            background-color: #1da1f2;
-            color:white;
+            border:3px solid black;
+            background-color: white;
+            color:black;
             display:flex;
             flex-direction: row;
             justify-content: center;
@@ -107,7 +107,7 @@
             transition:0.3s;
             cursor:pointer;
             &:hover{
-              background-color: #2394db;
+              background-color:#f2f2f2;
             }
           }
         }
@@ -138,9 +138,9 @@
             width:100%;
             height:45px;
             border-radius: 50px;
-            border: none;
-            background-color: #1da1f2;
-            color:white;
+            border: 3px solid black;
+            background-color: white;
+            color:black;
             display:flex;
             flex-direction: row;
             justify-content: center;
@@ -151,7 +151,7 @@
             transition:0.3s;
             cursor:pointer;
             &:hover{
-              background-color: #2394db;
+              background-color: #f2f2f2;
             }
           }
         }

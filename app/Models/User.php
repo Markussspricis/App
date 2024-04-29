@@ -24,7 +24,6 @@ class User extends Authenticatable
         'ProfilePicture',
         'Description',
         'Banner',
-
         'password_reset_token',
         'password_reset_expires_at',
     ];
@@ -77,11 +76,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(Messages::class, 'ReceiverID');
     }
-
-    // public function unreadMessages()
-    // {
-    //     return $this->hasMany(Messages::class, 'ReceiverID');
-    // }
 
     public function notificationsSent()
     {

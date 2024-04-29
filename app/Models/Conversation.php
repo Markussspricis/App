@@ -9,9 +9,9 @@ class Conversation extends Model
 {
     use HasFactory;
 
-    protected $table = 'conversations'; // Set the table name
+    protected $table = 'conversations';
 
-    protected $primaryKey = 'ConversationID'; // Set the primary key field
+    protected $primaryKey = 'ConversationID';
 
     protected $fillable = ['user1_id', 'user2_id'];
 

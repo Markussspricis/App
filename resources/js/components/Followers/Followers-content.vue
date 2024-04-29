@@ -7,7 +7,7 @@
             </button>
             <div class="profile-top">
                 <p class="title" v-if="followuser">{{ followuser.Name + "'s" }} followers</p>
-                <p class="tweet_count">{{ followersList.length }} people</p>
+                <p class="tweet_count">{{ followersList.length }} {{ followerCountLabel }}</p>
             </div>
         </div>
         <div class="people-container">
@@ -63,6 +63,9 @@ export default {
                     return 'Follow';
                 }
             };
+        },
+        followerCountLabel() {
+            return this.followersList.length === 1 ? 'person' : 'people';
         },
     },
     methods: {

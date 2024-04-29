@@ -25,7 +25,7 @@
         left:0;
         right:0;
         z-index: 1000;
-        background:rgba(29, 161, 242, 0.1);
+        background:rgba(3, 19, 28, 0.1);
         display:flex;
         justify-content:center;
         align-items:center;

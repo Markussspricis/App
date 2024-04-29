@@ -9,19 +9,19 @@ class Comment extends Model
 {
     use HasFactory;
 
-    protected $table = 'comments'; // Set the table name
+    protected $table = 'comments';
 
-    protected $primaryKey = 'CommentID'; // Set the primary key field
+    protected $primaryKey = 'CommentID';
 
-    protected $fillable = ['CommentText', 'UserID', 'TweetID']; // Define the fields that can be mass-assigned
+    protected $fillable = ['CommentText', 'UserID', 'TweetID'];
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'UserID'); // Define the relationship with the User model
+        return $this->belongsTo(User::class, 'UserID');
     }
 
     public function tweet()
     {
-        return $this->belongsTo(Tweet::class, 'TweetID'); // Define the relationship with the Tweet model
+        return $this->belongsTo(Tweet::class, 'TweetID');
     }
 }

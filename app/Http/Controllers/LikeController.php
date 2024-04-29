@@ -26,7 +26,6 @@ class LikeController extends Controller
             return response()->json(['message' => 'Tweet not found'], 404);
         }
 
-        // Check if the user has already liked the tweet
         $existingLike = Like::where('UserID', $user->UserID)
             ->where('TweetID', $tweet->TweetID)
             ->first();
@@ -35,7 +34,6 @@ class LikeController extends Controller
             return response()->json(['message' => 'You have already liked this tweet'], 400);
         }
 
-        // Create a new like
         $like = new Like();
         $like->UserID = $user->UserID;
         $like->TweetID = $tweet->TweetID;
@@ -51,7 +49,7 @@ class LikeController extends Controller
                     'SenderID' => $user->UserID,
                     'ReceiverID' => $tweet->UserID,
                     'NotificationType' => 'like',
-                    'NotificationText' => ' liked your tweet',
+                    'NotificationText' => ' liked your post',
                     'NotificationLink' => '/tweet/' . $tweet->TweetID,
                     'Read' => false,
                 ]);
@@ -75,7 +73,6 @@ class LikeController extends Controller
             return response()->json(['message' => 'Tweet not found'], 404);
         }
 
-        // Check if the user has already liked the tweet
         $existingLike = Like::where('UserID', $user->UserID)
             ->where('TweetID', $tweet->TweetID)
             ->first();
@@ -84,7 +81,6 @@ class LikeController extends Controller
             return response()->json(['message' => 'You have not liked this tweet'], 400);
         }
 
-        // Delete the existing like
         $existingLike->delete();
 
         return response()->json(['message' => 'Unliked successfully']);

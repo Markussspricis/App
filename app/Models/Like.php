@@ -9,19 +9,19 @@ class Like extends Model
 {
     use HasFactory;
 
-    protected $table = 'likes'; // Set the table name
+    protected $table = 'likes';
 
-    protected $primaryKey = 'LikeID'; // Set the primary key field
+    protected $primaryKey = 'LikeID';
 
-    protected $fillable = ['UserID', 'TweetID']; // Define the fields that can be mass-assigned
+    protected $fillable = ['UserID', 'TweetID'];
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'UserID'); // Define the relationship with the User model
+        return $this->belongsTo(User::class, 'UserID');
     }
 
     public function tweet()
     {
-        return $this->belongsTo(Tweet::class, 'TweetID'); // Define the relationship with the Tweet model
+        return $this->belongsTo(Tweet::class, 'TweetID');
     }
 }

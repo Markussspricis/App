@@ -17,11 +17,11 @@ class Notification extends Model
 
     public function sender()
     {
-        return $this->belongsTo(User::class, 'SenderID'); // Define the relationship with the User model for the sender
+        return $this->belongsTo(User::class, 'SenderID');
     }
 
     public function receiver()
     {
-        return $this->belongsTo(User::class, 'ReceiverID'); // Define the relationship with the User model for the receiver
+        return $this->belongsTo(User::class, 'ReceiverID');
     }
 }

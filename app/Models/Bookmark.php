@@ -9,19 +9,19 @@ class Bookmark extends Model
 {
     use HasFactory;
 
-    protected $table = 'bookmarks'; // Set the table name
+    protected $table = 'bookmarks';
 
-    protected $primaryKey = 'BookmarkID'; // Set the primary key field
+    protected $primaryKey = 'BookmarkID';
 
-    protected $fillable = ['UserID', 'TweetID']; // Define the fields that can be mass-assigned
+    protected $fillable = ['UserID', 'TweetID'];
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'UserID'); // Define the relationship with the User model
+        return $this->belongsTo(User::class, 'UserID');
     }
 
     public function tweet()
     {
-        return $this->belongsTo(Tweet::class, 'TweetID'); // Define the relationship with the Tweet model
+        return $this->belongsTo(Tweet::class, 'TweetID');
     }
 }

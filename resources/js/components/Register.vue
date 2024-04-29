@@ -241,14 +241,6 @@
           this.register();
         }
       },
-      monthNameToNumber(monthName) {
-        const months = [
-          "January", "February", "March", "April", "May", "June",
-          "July", "August", "September", "October", "November", "December"
-        ];
-        const monthNumber = months.findIndex(month => month === monthName) + 1;
-        return monthNumber.toString().padStart(2, '0');
-      },
       async register() {
         this.emailError = '';
         this.usernameError = '';
@@ -259,7 +251,7 @@
             UserTag: this.username,
             Email: this.email,
             Password: this.password,
-            DOB: `${this.year}-${this.monthNameToNumber(this.month)}-${this.day}`,
+            DOB: `${this.year}-${this.month}-${this.day}`,
           };
           const response = await this.$store.dispatch('register', registrationData);
 
@@ -383,7 +375,7 @@
   select option:disabled { display: none; }
   select option { color: black; }
   .account-background{
-    background:rgba(29, 161, 242, 0.1);
+    background:rgba(3, 19, 28, 0.1);
     z-index: 99;
     position: fixed;
     top: 0;
@@ -400,7 +392,7 @@
       height: 670px;
       background-color: white;
       border-radius: 20px;
-      border: 1px solid #1da1f2;
+      border: 1px solid black;
       color: black;
       .heading_create {
         position: absolute;
@@ -519,8 +511,8 @@
           }
           .submit-form{
             .next {
-              background-color: #1da1f2;
-              border: none;
+              background-color: white;
+              border: 2px solid black;
               border-radius: 50px;
               font-weight: bold;
               padding: 10px 20px;
@@ -533,15 +525,16 @@
               left: 40px;
               top: 600px;
               cursor: pointer;
-              color: white;
+              color: black;
               transition: all 0.3s;
             }
             .next:disabled{
               color: gray;
-              background-color: #0e537e;
+              background-color: #a6a6a6;
+              border: 2px solid gray;
             }
             .next:not(:disabled):hover {
-              background-color: #2394db;
+              background-color: #f2f2f2;
             }
           }
           .login-link {

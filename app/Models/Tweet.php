@@ -11,15 +11,15 @@ class Tweet extends Model
 {
     use HasFactory;
 
-    protected $table = 'tweets'; // Set the table name
+    protected $table = 'tweets';
 
-    protected $primaryKey = 'TweetID'; // Set the primary key field
+    protected $primaryKey = 'TweetID';
 
-    protected $fillable = ['TweetText', 'TweetImage', 'UserID']; // Define the fields that can be mass-assigned
+    protected $fillable = ['TweetText', 'TweetImage', 'UserID'];
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'UserID'); // Define the relationship with the User model
+        return $this->belongsTo(User::class, 'UserID');
     }
     public function comments()
     {
