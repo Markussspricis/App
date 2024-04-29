@@ -387,6 +387,7 @@
 
             if (this.$route.name != 'Index' && this.$route.name != 'Register' && this.$route.name != 'Login' && this.$route.name != 'UpdatePassword') {
                 // this.getAllUsersMention();
+                this.getUnreadNotificationCount();
                 this.unreadNotificationsIntervalId = setInterval(
                     this.getUnreadNotificationCount,
                     10000

@@ -246,6 +246,7 @@
                     const response = await $axios.post('/create-conversation', { userId });
                     if (response.data.conversation) {
                         console.log("Conversation created successfully");
+                        await fetchUserConversations(currentUser);
                     } else {
                         console.error("Failed to create conversation");
                     }
