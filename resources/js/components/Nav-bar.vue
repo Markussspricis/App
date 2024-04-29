@@ -178,7 +178,6 @@
                 isBookmarksFilled: false,
                 isProfileFilled: false,
                 unreadNotificationsCount: '',
-
                 unreadMessagesCount: '',
             }
         },

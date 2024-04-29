@@ -248,12 +248,18 @@ class MessageController extends Controller
             ->where('ConversationID', $conversationId)
             ->update(['Read' => true]);
 
-        // Fetch and return the updated unread count
-        $unreadCount = $user->messagesReceived()
+        // Fetch the total unread message count
+        $totalUnreadCount = $user->messagesReceived()->where('Read', false)->count();
+
+        // Fetch the updated unread count for the conversation
+        $conversationUnreadCount = $user->messagesReceived()
             ->where('ConversationID', $conversationId)
             ->where('Read', false)
             ->count();
 
-        return response()->json(['updatedUnreadCount' => $unreadCount]);
+        return response()->json([
+            'totalUnreadCount' => $totalUnreadCount,
+            'conversationUnreadCount' => $conversationUnreadCount
+        ]);
     }
 }

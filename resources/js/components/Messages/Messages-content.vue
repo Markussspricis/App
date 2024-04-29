@@ -212,8 +212,17 @@
             const markConversationAsRead = async (conversationId) => {
                 try {
                     const response = await $axios.post(`/conversation/${conversationId}/mark-as-read`);
-                    const updatedUnreadCount = response.data.updatedUnreadCount;
+                    const totalUnreadCount = response.data.totalUnreadCount;
+                    const conversationUnreadCount = response.data.conversationUnreadCount;
 
+                    // Update the overall unread message count in the navbar
+                    // If the conversation unread count was 0, subtract it from the total count
+                    // Otherwise, update the total count with the new total unread count
+                    if (conversationUnreadCount === 0) {
+                        unreadMessagesCount.value = totalUnreadCount;
+                    } else {
+                        unreadMessagesCount.value -= conversationUnreadCount;
+                    }
                 } catch (error) {
                     console.error('Error marking conversation as read:', error);
                 }
