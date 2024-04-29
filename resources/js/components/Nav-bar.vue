@@ -394,6 +394,7 @@
             }
             if (this.$route.name != 'Index' && this.$route.name != 'Register' && this.$route.name != 'Login' && this.$route.name != 'UpdatePassword') {
                 // this.getAllUsersMention();
+                this.getUnreadMessagesCount(); 
                 this.unreadMessagesIntervalId = setInterval(
                     this.getUnreadMessagesCount,
                     10000

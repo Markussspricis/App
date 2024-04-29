@@ -218,7 +218,7 @@ class MessageController extends Controller
     public function getUnreadMessagesCount()
     {
         $user = Auth::user();
-        $unreadCount = $user->messagesReceived()->count();
+        $unreadCount = $user->messagesReceived()->where('Read', false)->count();
         if ($unreadCount > 9) {
             $unreadCount = '9+';
         }
@@ -230,7 +230,6 @@ class MessageController extends Controller
     {
         $user = Auth::user();
         
-        // Fetch and return the updated unread count
         $unreadCount = $user->messagesReceived()
             ->where('ConversationID', $conversationId)
             ->where('Read', false)
@@ -243,22 +242,16 @@ class MessageController extends Controller
     {
         $user = Auth::user();
 
-        // Update the Read status of messages in the conversation
         $user->messagesReceived()
             ->where('ConversationID', $conversationId)
             ->update(['Read' => true]);
 
-        // Fetch the total unread message count
-        $totalUnreadCount = $user->messagesReceived()->where('Read', false)->count();
-
-        // Fetch the updated unread count for the conversation
         $conversationUnreadCount = $user->messagesReceived()
             ->where('ConversationID', $conversationId)
             ->where('Read', false)
             ->count();
 
         return response()->json([
-            'totalUnreadCount' => $totalUnreadCount,
             'conversationUnreadCount' => $conversationUnreadCount
         ]);
     }
