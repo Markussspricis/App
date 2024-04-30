@@ -1335,15 +1335,15 @@
             box-sizing: border-box;
             .edit-profile{
                 padding:10px 15px; 
-                color:white;
+                color:black;
                 font-size: 17px;
                 font-weight: bold;
-                border:3px solid #1da1f2;
+                border:2px solid black;
                 border-radius: 50px;
-                background-color: #000000;
+                background-color: white;
                 cursor: pointer;
                 &:hover{
-                    background-color:rgba($color: #202223, $alpha: 0.8);
+                    background-color: #f2f2f2;
                 }
             }
         }
