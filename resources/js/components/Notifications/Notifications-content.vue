@@ -317,6 +317,7 @@
                 transition:all 0.3s;
                 font-size:16px;
                 font-weight:600;
+                cursor: pointer;
                 &:hover{
                     background-color:rgba($color: #f2f2f2, $alpha: 0.8);
                 }
