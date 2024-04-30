@@ -13,8 +13,10 @@
   import Posts from './Posts.vue';
   import Users from './Users.vue';
   import Popup from '../Popup.vue';
+
   export default {
     name: 'Home',
+    
     components: {
       Posts,
       Users,

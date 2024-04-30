@@ -5,18 +5,19 @@ html,body {
     padding:0;
     scroll-behavior: smooth;
     &::-webkit-scrollbar{
-        width:10px;
-        cursor: pointer;
+        // width:10px;
+        // cursor: pointer;
+        display: none;
     }
-    &::-webkit-scrollbar-thumb{
-        background-color: #2F3336;
-        border-radius: 5px;;
-        border:none;
-    }
-    &::-webkit-scrollbar-track{
-        background:none;
-        border:none;
-    }
+    // &::-webkit-scrollbar-thumb{
+    //     background-color: #2F3336;
+    //     border-radius: 5px;;
+    //     border:none;
+    // }
+    // &::-webkit-scrollbar-track{
+    //     background:none;
+    //     border:none;
+    // }
 }
 @media(max-width: 1000px){
     html,body {
@@ -104,7 +105,7 @@ html,body {
         cursor:pointer;
         transition: all 0.3s;
         &:hover{
-            background-color: rgba($color: #e8dddd, $alpha: 1);
+            background-color: rgba($color: #f2f2f2, $alpha: 1);
         }
     }
     .top-top-top{
@@ -198,7 +199,7 @@ html,body {
                 font-size:20px;
             }
             &:hover{
-                background-color: #e8dddd;
+                background-color: #f2f2f2;
             }
         }
     }
@@ -312,7 +313,6 @@ html,body {
                         justify-content: center;
                         align-items: center;
                         padding:0;
-                        cursor:pointer;
                         .tweet-img-label{
                             width:100%;
                             height:100%;
@@ -321,6 +321,7 @@ html,body {
                             align-items: center;
                             margin: 0;
                             padding: 0;
+                            cursor:pointer;
                         }
                         .create-tweet-icon{
                             font-size:20px;
@@ -413,6 +414,7 @@ html,body {
             height:50px;
             border-radius: 50%;
             background-color: white;
+            cursor: pointer;
         }
     }
     .no-posts{
@@ -710,7 +712,6 @@ html,body {
         gap:10px;
         box-sizing: border-box;
         padding:20px 10px 15px 15px;
-        border-top: 1px solid #2F3336;
         border-image: linear-gradient(90deg, transparent 4%,#2F3336 4%);
         border-image-slice: 1;
         justify-content: space-between;
@@ -982,7 +983,6 @@ html,body {
                 justify-content: center;
                 align-items: center;
                 padding:0;
-                cursor:pointer;
                 transition: all 0.3s;
                 .tweet-img-label{
                     width:100%;
@@ -992,6 +992,7 @@ html,body {
                     align-items: center;
                     margin: 0;
                     padding: 0;
+                    cursor:pointer;
                 }
                 .create-tweet-icon{
                     font-size:20px;
@@ -1061,15 +1062,15 @@ html,body {
             justify-content: center;
             text-align: center;
             border-radius: 50px;
-            border:1px solid #6A6F74;
-            background-color: rgba($color: #16181C, $alpha: 0.5);
-            color:white;
+            border:2px solid black;
+            background-color: white;
+            color:black;
             font-size:15px;
             font-weight: bold;
             transition:all 0.3s;
             cursor:pointer;
             &:hover{
-                background-color: rgba($color: #16181C, $alpha: 1);
+                background-color: #f2f2f2;
             }
         }
         .delete-button{
@@ -1079,7 +1080,7 @@ html,body {
             justify-content: center;
             text-align: center;
             border-radius: 50px;
-            border:1px solid #e42020;
+            border:2px solid #e42020;
             background-color: rgba($color: #e42020, $alpha: 0.1);
             color:#e42020;
             font-size:15px;
@@ -1098,7 +1099,7 @@ html,body {
             justify-content: center;
             text-align: center;
             border-radius: 50px;
-            border:1px solid #e42020;
+            border:2px solid #e42020;
             background-color: rgba($color: #e42020, $alpha: 0.1);
             color:#e42020;
             font-size:15px;
@@ -1118,7 +1119,7 @@ html,body {
     justify-content: center;
     text-align: center;
     border-radius: 50px;
-    border:none;
+    border:2px solid black;
     background-color: white;
     color:black;
     font-size:15px;
@@ -1126,16 +1127,16 @@ html,body {
     transition:all 0.3s;
     cursor:pointer;
     &:hover{
-        background-color: #D7DBDC;
+        background-color: #f2f2f2;
     }
 }
 .followed-button{
-    border:1px solid #6A6F74;
-    background-color: #16181C;
+    border:2px solid black;
+    background-color: rgb(61, 58, 58);
     color:white;
 }
 .unfollow-button{
-    border:1px solid #e42020;
+    border:2px solid #e42020;
     background-color: rgba($color: #e42020, $alpha: 0.4);
     color:#e42020;
     cursor:pointer;
@@ -1304,7 +1305,7 @@ html,body {
                 }
             }
             .person:hover{
-                background-color: #e8dddd;
+                background-color: #f2f2f2;
             }
         }
     }
@@ -1389,7 +1390,7 @@ html,body {
             transition:all 0.3s;
         }
         .show-more-btn:hover{
-            background-color: #e8dddd;
+            background-color: #f2f2f2;
         }
     }
 }

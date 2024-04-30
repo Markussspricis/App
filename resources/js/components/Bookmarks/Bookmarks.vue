@@ -13,8 +13,10 @@
     import BookmarksContent from './Bookmarks-content.vue';
     import Popup from '../Popup.vue';
     import Users from '../Home/Users.vue';
+
     export default {
         name: 'Bookmarks',
+        
         components: {
             BookmarksContent,
             Popup,

@@ -1,6 +1,6 @@
 <template>
     <div class="notifications-container">
-        <div class="black-line"></div>
+        <!-- <div class="black-line"></div> -->
         <div class="top-bar">
             <div class="top-top">
                 <button class="back-icon" @click="goBack">
@@ -21,14 +21,13 @@
                 </button>
             </div>
             <div class="notification-buttons">
-                <input type="checkbox" class="checkbox" @click.stop="selectAll()" id="selectAllCheckBox" title="Select all">
+                <input type="checkbox" class="checkbox" v-model="isMarkAllActive" @click.stop="selectAll()" id="selectAllCheckBox" title="Select all">
                 <button @click="selectUnread" class="noti-btn" title="Select unread"><ion-icon name="mail-unread"></ion-icon></button>
                 <button @click="selectRead" class="noti-btn" title="Select read"><ion-icon name="mail-open"></ion-icon></button>
                 <button @click="markSelectedAsRead" class="noti-btn" title="Mark selected as read"><ion-icon name="book"></ion-icon></button>
                 <button @click="deleteSelected" class="noti-btn" title="Delete selected"><ion-icon class="delete" name="trash"></ion-icon></button>
             </div>
         </div>
-
         <div class="noti-main" v-if ="currentNotifications.length <= 0">
             <div class="main-text">Nothing to see here — yet</div>
             <div class="under-text" v-if="notiType=='all'">All notifications will be shown here.</div>
@@ -62,8 +61,10 @@
 <script>
     import { mapState } from 'vuex';
     import axios from 'axios';
+    
     export default{
         name: 'NotificationsContent',
+        
         data() {
             return {
                 notiType: 'all',
@@ -247,6 +248,15 @@
         beforeRouteLeave(to, from, next) {
             clearInterval(this.checkForNewNotificationsInterval);
         },
+        
+        watch: {
+            selectedNotifications: {
+                handler() {
+                    this.isMarkAllActive = false;
+                },
+                deep: true
+            }
+        },
     }
 </script>
 
@@ -308,7 +318,7 @@
                 font-size:16px;
                 font-weight:600;
                 &:hover{
-                    background-color:rgba($color: #e8dddd, $alpha: 0.8);
+                    background-color:rgba($color: #f2f2f2, $alpha: 0.8);
                 }
                 .noti-title{
                     display:flex;
@@ -373,7 +383,7 @@
                 font-weight:600;
                 cursor:pointer;
                 &:hover{
-                    background-color:rgba($color: #e8dddd, $alpha: 0.8);
+                    background-color:rgba($color: #f2f2f2, $alpha: 0.8);
                 }
                 ion-icon{
                     color:#a9adb1;
@@ -478,7 +488,7 @@
                 }
             }
             &:hover{
-                background-color: #e8dddd;
+                background-color: #f2f2f2;
             }
         }
         .unread{

@@ -9,8 +9,10 @@
 <script>
     import PeopleContent from './People-content.vue';
     import Popup from '../Popup.vue';
+
     export default {
         name: 'People',
+        
         components: {
             PeopleContent,
             Popup,

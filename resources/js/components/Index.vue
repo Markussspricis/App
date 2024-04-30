@@ -30,13 +30,15 @@
 <script>
   export default {
     name: 'Index',
+
     methods: {
       goToRegister() {
         this.$router.push('/register');
       },
+
       goToLogin() {
         this.$router.push('/login');
-      }
+      },
     }
   }
 </script>

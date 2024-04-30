@@ -13,8 +13,10 @@
     import Profile from './User-content.vue';
     import Users from '../Home/Users.vue';
     import Popup from '../Popup.vue';
+
     export default {
         name: 'User',
+        
         components: {
             Profile,
             Users,

@@ -13,8 +13,10 @@
     import NotificationsContent from './Notifications-content.vue';
     import Popup from '../Popup.vue';
     import Users from '../Home/Users.vue';
+
     export default {
         name: 'Notifications',
+        
         components: {
             NotificationsContent,
             Popup,

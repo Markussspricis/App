@@ -11,11 +11,14 @@
 
 <script>
   import NavBar from './Nav-bar.vue';
+
   export default {
     name: 'App',
+
     components: {
       NavBar,
     },
+    
     methods: {
       logout(e){
         e.preventDefault()

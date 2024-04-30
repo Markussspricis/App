@@ -229,11 +229,9 @@ class UserController extends Controller
             $messages[] = 'Name cannot be empty';
         }
 
-        if ($newDescription) {
+        if ($newDescription !== null && strtolower($newDescription) !== 'null') {
             $user->description = $newDescription;
             $messages[] = 'Description updated successfully';
-        } else {
-            $user->description = '';
         }
 
         if ($newProfilePicture) {

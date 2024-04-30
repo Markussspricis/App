@@ -103,50 +103,11 @@
             <div class="bottom">
                 <div class="buttons">
                     <button class="tweet-btn"><input type="file" accept="image/png, image/gif, image/jpeg, video/mp4,video/x-m4v,video/*" id="tweet-img-input-tweetnav" @change="onImageChangenav" hidden><label for="tweet-img-input-tweetnav" class="tweet-img-label"><ion-icon name="images-outline" class="create-tweet-icon"></ion-icon></label></button>
-                    <!-- <button class="tweet-btn"><ion-icon name="happy-outline" class="create-tweet-icon"></ion-icon></button> -->
-                    <!-- <button class="tweet-btn" @click.stop="TogglePopup('MentionTrigger', 'comment')"><ion-icon name="at-sharp" class="create-tweet-icon"></ion-icon></button> -->
                 </div>
                 <button class="popup-button"  @click="createTweetnav" :disabled="buttonDisabled || !tweet_text_inputnav && !previewImagenav">Post</button>
             </div>
         </div>
     </Popup>
-    <!-- <Popup v-if="popupTriggers.MentionTrigger" :TogglePopup="() => TogglePopup('MentionTrigger')">
-        <div class="mention-popup">
-            <p class="title">Mention</p>
-            <div class="search-input-container">
-                <input 
-                    type="text"
-                    id="mention-input"
-                    class="search-input" 
-                    maxlength="30" 
-                    placeholder="Search"
-                    :class="{ 'focused': isInputFocused }"
-                    @input="handleMentionInput"
-                    @focus="inputFocus"
-                    @blur="inputBlur"
-                    v-model="mentionSearch"
-                >
-                <ion-icon name="search-outline" class="search-icon"></ion-icon>
-                <button class="close-icon-btn" :class="{ 'focused': isInputFocused }">
-                    <ion-icon name="close-circle-sharp" class="close-icon"></ion-icon>
-                </button>
-            </div>
-            <div class="user-suggestions">
-                <div class="user" v-for="user in filteredUsers" :key="user.UserID" @click="insertMention(user)">
-                    <div class="user-img">
-                        <img @click="openProfile(user.UserTag)" :src="'/storage/' + user.ProfilePicture">
-                    </div>
-                    <div class="user-info">
-                        <p class="username">{{ user.Name }}</p>
-                        <p class="usertag">{{ user.UserTag }}</p>
-                    </div>
-                </div>
-                <div class="no-users" v-if="filteredUsers.length === 0">
-                    <p>No users found 🌵</p>   
-                </div>
-            </div>
-        </div>
-    </Popup> -->
 </template>
 
 <script>
@@ -158,19 +119,20 @@
     import { mapState } from 'vuex';
     export default{
         name: 'NavBar',
+
         components: {
             Popup,
         },
+
         computed:{
             ...mapState(['user']),
         },
+
         data(){
             return {
-                users: [],
                 tweets: [],
                 isPopupVisible: false,
                 buttonDisabled: false,
-                isInputFocused: false,
                 activeRoute: '',
                 isHomeFilled: false,
                 isNotificationsFilled: false,
@@ -181,6 +143,7 @@
                 unreadMessagesCount: '',
             }
         },
+
         setup(){
             const tweet_text_input = ref('');
             const tweet_text_inputnav = ref('');
@@ -188,27 +151,21 @@
             const previewImagenav = ref(null);
             const router = useRouter();
             const store = useStore();
-            // const mentionSearch = ref('');
-            // const filteredUsers = ref([]);
             const tweetInputnav = ref(null);
-
 
             const popupTriggers = ref({
                 TweetTrigger: false,
-                // MentionTrigger: false,
             });
+
             const TogglePopup = (trigger) => {
                 popupTriggers.value[trigger] = !popupTriggers.value[trigger]
                 tweetImagenav.value=null;
                 previewImagenav.value=null;
-                // if (trigger === 'MentionTrigger') {
-                //     mentionSearch.value = '';
-                //     filteredUsers.value = [];
-                // }
                 if (trigger === 'TweetTrigger') {
                     tweet_text_inputnav.value='';
                 }
-            }
+            };
+
             const logoutUser = async () => {
                 try {
                     await store.dispatch('logout');
@@ -217,6 +174,7 @@
                     console.error(error);
                 }
             };
+
             return {
                 popupTriggers,
                 TogglePopup,
@@ -225,54 +183,15 @@
                 tweet_text_input,
                 tweetImagenav,
                 previewImagenav,
-                // mentionSearch,
-                // filteredUsers,
                 tweetInputnav,
             }
         },
         methods: {
-            inputFocus() {
-                this.isInputFocused = true;
-            },
-            inputBlur() {
-                this.isInputFocused = false;
-            },
-            // insertMention(user) {
-            //     const cursorPosition = this.tweetInputnav.value.selectionStart;
-
-            //     const textarea = this.tweetInputnav;
-
-            //     if (!textarea) {
-            //         console.error("Textarea not found");
-            //         return;
-            //     }
-
-            //     const mentionTag = `${user.UserTag}`;
-            //     const cursorPos = textarea.selectionStart;
-            //     const textBeforeCursor = textarea.value.substring(0, cursorPos);
-            //     const textAfterCursor = textarea.value.substring(cursorPos);
-
-            //     this.tweet_text_inputnav = textBeforeCursor + mentionTag + textAfterCursor;
-
-            //     this.TogglePopup('MentionTrigger');
-
-            //     textarea.setSelectionRange(cursorPosition + mentionTag.length, cursorPosition + mentionTag.length);
-            // },
-            // handleMentionInput() {
-            //     if (this.mentionSearch.length > 0) {
-            //         this.filteredUsers = this.users.filter(user => {
-            //             const searchInputLower = this.mentionSearch.toLowerCase();
-            //             const userTagLower = user.UserTag.toLowerCase();
-            //             return userTagLower.includes(searchInputLower);
-            //         });
-            //     } else {
-            //         this.filteredUsers = [];
-            //     }
-            // },
             toggleProfilePopup() {
                 this.isPopupVisible = !this.isPopupVisible;
                 setTimeout(() => { this.isPopupVisible = false; }, 10000);
             },
+
             autoSize() {
                 const maxRows = 5;
                 const textarea = this.$refs.tweetInputnav;
@@ -286,12 +205,14 @@
                     textarea.style.height = maxHeight + 'px';
                 }
             },
+
             openProfile(tag){
                 const NoSymbolTag = tag.replace(/^@/, '');
                 this.$router.push({ name: 'Profile', params: { UserTag : NoSymbolTag } });
                 console.log(tag);
                 this.isPopupVisible = false;
             },
+
             onImageChangenav(event) {
                 this.tweetImagenav = event.target.files[0];
                 if (this.tweetImagenav) {
@@ -300,10 +221,12 @@
                     this.previewImagenav = null;
                 }
             },
+
             removeImage(){
                 this.tweetImagenav = null;
                 this.previewImagenav = null;
             },
+
             async createTweetnav() {
                 if (this.buttonDisabled) {
                     return;
@@ -335,19 +258,9 @@
                     this.buttonDisabled = false;
                 }
             },
-            // getAllUsersMention() {
-            // axios
-            //     .get('/api/all-users-mention')
-            //     .then(response => {
-            //         this.users = response.data;
-            //     })
-            //     .catch(error => {
-            //         console.error(error);
-            //     });
-            // },
+
             getUnreadNotificationCount(){
-            axios
-                .get('/api/get-unread-notification-count')
+            axios.get('/api/get-unread-notification-count')
                 .then(response => {
                     this.unreadNotificationsCount = response.data.unreadCount;
                 })
@@ -386,7 +299,6 @@
             });
 
             if (this.$route.name != 'Index' && this.$route.name != 'Register' && this.$route.name != 'Login' && this.$route.name != 'UpdatePassword') {
-                // this.getAllUsersMention();
                 this.getUnreadNotificationCount();
                 this.unreadNotificationsIntervalId = setInterval(
                     this.getUnreadNotificationCount,
@@ -394,7 +306,6 @@
                 );
             }
             if (this.$route.name != 'Index' && this.$route.name != 'Register' && this.$route.name != 'Login' && this.$route.name != 'UpdatePassword') {
-                // this.getAllUsersMention();
                 this.getUnreadMessagesCount(); 
                 this.unreadMessagesIntervalId = setInterval(
                     this.getUnreadMessagesCount,
@@ -402,9 +313,11 @@
                 )
             }
         },
+
         beforeDestroy() {
             clearInterval(this.unreadNotificationsIntervalId && this.unreadMessagesIntervalId);
         },
+
         beforeUnmount() {
             clearInterval(this.unreadNotificationsIntervalId && this.unreadMessagesIntervalId);
         },
@@ -455,7 +368,7 @@
             transition: color 0.3s;
             cursor: pointer;
             &:hover{
-                background-color: #e8dddd;
+                background-color: #f2f2f2;
             }
             .button-content {
                 display: flex;
@@ -586,7 +499,7 @@
             justify-content: center;
         }
         &:hover{
-            background-color: #e8dddd;
+            background-color: #f2f2f2;
         }
     }
     .profile-popup{
@@ -617,7 +530,7 @@
                 font-size:16px;
                 transition: all 0.3s;
                 &:hover{
-                    background-color: #e8dddd;
+                    background-color: #f2f2f2;
                 }
             }
             .logout-btn{
@@ -656,7 +569,6 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px;
-            // background-color: black;
             z-index: 99;
         }
         .buttons {

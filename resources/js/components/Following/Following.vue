@@ -12,8 +12,10 @@
 <script>
     import FollowingContent from './Following-content.vue';
     import Users from '../Home/Users.vue';
+
     export default {
         name: 'Following',
+        
         components: {
             FollowingContent,
             Users,

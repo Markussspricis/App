@@ -83,11 +83,14 @@
   import { ref } from 'vue';
   import Popup from '../Popup.vue';
   import { useStore } from 'vuex';
+  
   export default {
     name: 'Conversation',
+
     components: {
       Popup,
     },
+
     data(){
       return{
         previewImagenav: null,
@@ -98,6 +101,7 @@
         messages: [],
       }
     },
+
     setup() {
       const popupTriggers = ref({});
       const store = useStore();
@@ -115,8 +119,7 @@
       };
 
       store.watch(() => store.state.user, (user) => {
-        // Update the authenticated user ID when the user object changes
-        authenticatedUserID.value = user ? user.UserID : null; // Assuming user object has an 'id' property
+        authenticatedUserID.value = user ? user.UserID : null;
       });
 
       return {
@@ -125,9 +128,11 @@
         authenticatedUserID,
       }
     },
+
     props: {
       user: Object,
     },
+
     methods: {
       async sendMessage() {
         if (!this.messageText.trim()) return;
@@ -138,68 +143,62 @@
 
         try {
             await this.$axios.post('/api/send-message', formData);
-            // Clear input fields and variables after sending message
             this.$refs.tweetInputnav.value = '';
             this.previewImagenav = null;
             this.messageImagenav = null;
             this.isSendDisabled = true;
             this.resetInputHeight();
-            // Fetch updated messages after sending message
             this.fetchMessages();
             this.$nextTick(() => {
               setTimeout(() => {
                 this.scrollToBottom();
-              }, 1000); // Adjust delay as needed
+              }, 1000);
             });
         } catch (error) {
             console.error(error);
         }
       },
-      // Inside deleteMessage method
+
       async deleteMessage(messageID, deleteType) {
         try {
-          const authenticatedUser = this.$store.state.user; // Assuming the user object is stored in the Vuex state
+          const authenticatedUser = this.$store.state.user;
 
-          console.log("Authenticated User:", authenticatedUser); // Log the authenticated user
+          console.log("Authenticated User:", authenticatedUser);
 
-          // Validate authenticatedUserID
           if (!authenticatedUser || typeof authenticatedUser.UserID !== 'number' || authenticatedUser.UserID <= 0) {
             console.error("Invalid authenticated user ID");
             return;
           }
 
           console.log("Delete Request Payload:", { deleteType, authenticatedUserID: authenticatedUser.UserID });
-          // Send delete request with authenticatedUserID
           await this.$axios.delete(`/api/messages/${messageID}`, {
-            data: { deleteType, authenticatedUserID: authenticatedUser.UserID } // Pass the authenticated user ID
+            data: { deleteType, authenticatedUserID: authenticatedUser.UserID }
           });
 
           if (deleteType === 'self') {
-            // Remove the message from the UI immediately
             const index = this.messages.findIndex(message => message.MessageID === messageID);
             if (index !== -1) {
               this.messages.splice(index, 1);
             }
-            // Close the popup after deleting a self-type message
             this.TogglePopup();
           } else if (deleteType === 'all') {
             const index = this.messages.findIndex(message => message.MessageID === messageID);
             if (index !== -1) {
               this.messages.splice(index, 1);
             }
-            // Close the popup after deleting for all types of messages
             this.TogglePopup();
           }
 
-          // Update UI or perform any other action after successful deletion
         } catch (error) {
           console.error("Error deleting message:", error);
         }
       },
+
       resetInputHeight() {
         const textarea = this.$refs.tweetInputnav;
-        textarea.style.height = ''; // Resetting the height to its default value
+        textarea.style.height = '';
       },
+
       async fetchMessages() {
         try {
           const response = await this.$axios.get(`/api/conversation/${this.user.UserID}`);
@@ -210,9 +209,11 @@
           console.error("Error fetching messages:", error);
         }
       },
+
       closeConversation() {
         this.$emit('closeConversation');
       },
+
       onImageChangenav(event) {
         this.messageImagenav = event.target.files[0];
         if (this.messageImagenav) {
@@ -221,6 +222,7 @@
           this.previewImagenav = null;
         }
       },
+
       autoSize() {
         const maxRows = 5;
         const textarea = this.$refs.tweetInputnav;
@@ -234,25 +236,29 @@
           textarea.style.height = maxHeight + 'px';
         }
       },
+      
       updateMessageText(event) {
         this.messageText = event.target.value;
       },
+
       handleInput(event) {
         this.autoSize();
         this.updateMessageText(event);
         this.isSendDisabled = !this.messageText.trim();
       },
+
       removeImage(){
         this.previewImagenav = null;
       },
+
       scrollToBottom() {
         if (this.$refs.messagesContainer && this.messages.length > 0) {
           this.$refs.messagesContainer.scrollTop = this.$refs.messagesContainer.scrollHeight;
         }
       },
     },
+
     mounted() {
-      // Fetch messages when the component is mounted
       this.fetchMessages().then(() => {
         setTimeout(() => {
           this.scrollToBottom();

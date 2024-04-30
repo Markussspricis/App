@@ -77,10 +77,12 @@
 
     export default {
         name: 'MessagesContent',
+
         components: {
             Conversation,
             Popup,
         },
+
         setup() {
             const $axios = axios.create({ baseURL: '/api/' });
             const searchInput = ref('');
@@ -151,7 +153,6 @@
                         conversation.user1.UserID === currentUser.value.UserID || conversation.user2.UserID === currentUser.value.UserID
                     );
 
-                    // Fetch unread message count for each conversation
                     await Promise.all(filteredConversations.map(async conversation => {
                         const response = await $axios.get(`/conversation/${conversation.ConversationID}/unread-count`);
                         conversation.unreadCount = response.data.unreadCount;
@@ -195,7 +196,6 @@
                         await markConversationAsRead(conversation.ConversationID);
                         conversation.unreadCount = 0;
 
-                        // Update unread count in the userConversations array
                         const conversationIndex = userConversations.value.findIndex(conv => conv.ConversationID === conversation.ConversationID);
                         if (conversationIndex !== -1) {
                             userConversations.value[conversationIndex].unreadCount = 0;
@@ -212,17 +212,8 @@
             const markConversationAsRead = async (conversationId) => {
                 try {
                     const response = await $axios.post(`/conversation/${conversationId}/mark-as-read`);
-                    // const totalUnreadCount = response.data.totalUnreadCount;
                     const conversationUnreadCount = response.data.conversationUnreadCount;
 
-                    if (conversationUnreadCount === 0) {
-                        // unreadMessagesCount.value = totalUnreadCount; // Update the total unread count if needed
-                    } else {
-                        unreadMessagesCount.value -= conversationUnreadCount;
-                    }
-
-                    // Emit event to notify navbar to update unread count
-                    //this.$emit('conversationMarkedAsRead', conversationId);
                 } catch (error) {
                     console.error('Error marking conversation as read:', error);
                 }
@@ -383,7 +374,7 @@
                             border-radius: 50px;
                             padding-left:60px;
                             border:  1px solid transparent;
-                            background-color: #e8dddd;
+                            background-color: #f2f2f2;
                             position: relative;
                             color:black;
                             font-size: medium;

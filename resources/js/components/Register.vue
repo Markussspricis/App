@@ -142,6 +142,7 @@
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   export default {
     name: 'Register',
+
     data() {
       return {
         name: '',
@@ -182,6 +183,7 @@
         error:null,
       };
     },
+
     computed: {
       days() {
         if (this.month === '') return [];
@@ -189,15 +191,18 @@
         const daysInMonth = new Date(this.year, selectedMonth, 0).getDate();
         return Array.from({ length: daysInMonth }, (_, index) => index + 1);
       },
+
       allFieldsFilled() {
         return this.name && this.username && this.email && this.password && this.confirmPassword && this.month && this.day && this.year;
       },
     },
+
     mounted() {
       this.$refs.selectMonth.style.color = "black";
       this.$refs.selectDay.style.color = "black";
       this.$refs.selectYear.style.color = "black";
     },
+
     methods: {
       validateForm(e) {
         e.preventDefault()
@@ -241,6 +246,7 @@
           this.register();
         }
       },
+
       async register() {
         this.emailError = '';
         this.usernameError = '';
@@ -275,14 +281,17 @@
           console.error(error);
         }
       },
+
       updateLabel(fieldName) {
         this.isLabelActive[fieldName] = this[fieldName].length > 0;
         this.isInputCommitted[fieldName] = false;
       },
+
       moveLabelUp(fieldName) {
         this.isLabelActive[fieldName] = true;
         this.isInputCommitted[fieldName] = false;
       },
+
       resetLabelPosition(fieldName) {
         if (this[fieldName].length === 0) {
           this.isLabelActive[fieldName] = false;
@@ -292,13 +301,16 @@
         }
       },
     },
+
     watch: {
       month: function () {
         this.$refs.selectMonth.style.color = "black";
       },
+
       day: function () {
         this.$refs.selectDay.style.color = "black";
       },
+      
       year: function () {
         this.$refs.selectYear.style.color = "black";
       },

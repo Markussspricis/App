@@ -39,14 +39,17 @@
 
 <script>
     import { mapState } from 'vuex';
+
     export default {
         name: 'PeopleContent',
+
         data: () => ({
             showTweetWindow: false,
             followed: false,
             users:[],
             isHovered:  [],
         }),
+
         computed: {
             ...mapState(['user']),
             followButtonLabel() {
@@ -61,15 +64,18 @@
                 };
             },
         },
+
         methods: {
             goBack() {
                 this.$router.go(-1);
             },
+
             openProfile(tag){
                 const NoSymbolTag = tag.replace(/^@/, '');
                 this.$router.push('/profile/' + NoSymbolTag);
                 console.log(tag);
             },
+
             toggleFollowUnfollow(userID) {
                 const user = this.users.find((t) => t.UserID === userID);
                 if (user.isFollowedByMe) {
@@ -78,6 +84,7 @@
                     this.handleFollow(userID);
                 }
             },
+
             async handleFollow(userID) {
                 try {
                     const response = await this.$axios.post(`/api/follow/${userID}`);
@@ -90,6 +97,7 @@
                     console.error('Error following the user:', error);
                 }
             },
+
             async handleUnfollow(userID) {
                 try {
                     const response = await this.$axios.post(`/api/unfollow/${userID}`);
@@ -103,6 +111,7 @@
                 }
             },
         },
+        
         async mounted() {
             await this.$store.dispatch('initializeApp');
             this.$axios.get('/api/allusers')
@@ -118,7 +127,7 @@
 
 <style lang="scss" scoped>
     .content-container{
-        height: 100vh;
+        height: 100%;
         border-right: 1px solid #2F3336;
         .top-bar {
             height: 60px;
@@ -148,7 +157,7 @@
                 cursor: pointer;
                 transition: all 0.3s;
                 &:hover {
-                    background-color: rgba($color: #e8dddd, $alpha: 0.9);
+                    background-color: rgba($color: #f2f2f2, $alpha: 0.9);
                 }
             }
             .title {
@@ -239,7 +248,7 @@
                     justify-content: center;
                 }
                 &:hover{
-                    background-color: rgba($color: #e8dddd, $alpha: 0.9);
+                    background-color: rgba($color: #f2f2f2, $alpha: 0.9);
                 }
             }
         }

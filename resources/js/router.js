@@ -91,7 +91,6 @@ const router = createRouter({
   ],
 });
 
-// Navigation guard
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth) {
     if (checkAuth()) {

@@ -12,8 +12,10 @@
 <script>
     import FollowersContent from './Followers-content.vue';
     import Users from '../Home/Users.vue';
+
     export default {
         name: 'Followers',
+        
         components: {
             FollowersContent,
             Users,

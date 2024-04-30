@@ -54,7 +54,7 @@
                 cursor: pointer;
             }
             .pop-up-close:hover{
-                background-color: #e8dddd;
+                background-color: #f2f2f2;
             }
             .pop-up-icon{
                 color:black;

@@ -82,6 +82,7 @@
 
   export default {
     name: 'UpdatePassword',
+
     data() {
       return {
         isLabelActive: {
@@ -96,11 +97,13 @@
         },
       };
     },
+
     computed: {
       isButtonDisabled() {
         return !(this.email.length > 0 && this.newPassword.length > 0 && this.confirmPassword.length > 0);
       },
     },
+
     setup () {
       const router = useRouter();
       const emailError = ref(null);
@@ -193,15 +196,18 @@
         passwordMismatch,
       }
     },
+
     methods: {
       updateLabel(fieldName) {
         this.isLabelActive[fieldName] = this[fieldName].length > 0;
         this.isInputCommitted[fieldName] = false;
       },
+
       moveLabelUp(fieldName) {
         this.isLabelActive[fieldName] = true;
         this.isInputCommitted[fieldName] = false;
       },
+      
       resetLabelPosition(fieldName) {
         if (this[fieldName].length === 0) {
           this.isLabelActive[fieldName] = false;

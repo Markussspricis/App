@@ -65,6 +65,7 @@
 
   export default {
     name: 'Login',
+
     data() {
       return {
         email: '',
@@ -81,11 +82,13 @@
         },
       };
     },
+
     computed: {
       isButtonDisabled() {
         return !(this.email.length > 0 && this.password.length > 0)
       },
     },
+
     setup () {
       const router = useRouter();
       const store = useStore();
@@ -127,6 +130,7 @@
           setTimeout(() => { emailError.value = null; }, 3000);
         }
       };
+
       const login = async (event) => {
         event.preventDefault();
         console.log('Login button clicked');
@@ -149,6 +153,7 @@
           }
         }
       };
+
       return {
         email,
         password,
@@ -159,15 +164,18 @@
         emailError,
       }
     },
+
     methods: {
       updateLabel(fieldName) {
         this.isLabelActive[fieldName] = this[fieldName].length > 0;
         this.isInputCommitted[fieldName] = false;
       },
+
       moveLabelUp(fieldName) {
         this.isLabelActive[fieldName] = true;
         this.isInputCommitted[fieldName] = false;
       },
+      
       resetLabelPosition(fieldName) {
         if (this[fieldName].length === 0) {
           this.isLabelActive[fieldName] = false;

@@ -9,8 +9,10 @@
 <script>
     import MessagesContent from './Messages-content.vue';
     import Popup from '../Popup.vue';
+
     export default {
         name: 'Messages',
+        
         components: {
             MessagesContent,
             Popup,
