@@ -150,7 +150,6 @@
 
             const popupTriggers = ref({
                 CommentTrigger: false,
-                ProfileTrigger: false,
             });
 
             const TogglePopup = (trigger) => {
@@ -347,7 +346,7 @@
                         tweetId: tweetID,
                         commentText: commentText,
                     });
-                    const tweet = this.currentPosts.find((t) => t.TweetID === tweetID);
+                    const tweet = this.tweets.find((t) => t.TweetID === tweetID);
                     const newComment = response.data.comment;
                     this.comments.unshift(newComment);
                     tweet.comment_count++;
