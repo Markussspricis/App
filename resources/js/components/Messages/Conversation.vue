@@ -333,7 +333,7 @@
           cursor:pointer;
           transition: all 0.3s;
           &:hover{
-            background-color: rgba($color: #e8dddd, $alpha: 1);
+            background-color:#f2f2f2;
           }
         }
         .person-img{
@@ -399,7 +399,7 @@
         }
         &::-webkit-scrollbar-thumb{
           background-color: #2F3336;
-          border-radius: 5px;;
+          border-radius: 5px;
           border:none;
         }
         &::-webkit-scrollbar-track{
@@ -570,7 +570,7 @@
             }
             &::-webkit-scrollbar-thumb{
               background-color: #2F3336;
-              border-radius: 5px;;
+              border-radius: 5px;
               border:none;
             }
             &::-webkit-scrollbar-track{

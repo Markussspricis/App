@@ -1,6 +1,5 @@
 <template>
     <div class="content-container">
-        <!-- <div class="black-line"></div> -->
         <div class="top-bar">
             <button class="back-icon" @click="goBack">
                 <ion-icon name="arrow-back-outline"></ion-icon>
@@ -74,7 +73,7 @@
                                     <p class="time-posted">{{ tweet.created_ago }}</p>
                                 </div>
                                 <div class="content-text">
-                                    <p v-if="tweet.TweetText" v-html="formatMentionText(tweet.TweetText)" @click.stop="handleMentionClick"></p>
+                                    <p v-if="tweet.TweetText" v-html="(tweet.TweetText)"></p>
                                 </div>
                             </div>
                         </div>
@@ -85,7 +84,7 @@
                                 <p class="time-posted">{{ tweet.created_ago }}</p>
                             </div>
                             <div class="content-text">
-                                <p v-if="tweet.TweetText" v-html="formatMentionText(tweet.TweetText)" @click.stop="handleMentionClick"></p>
+                                <p v-if="tweet.TweetText" v-html="(tweet.TweetText)"></p>
                             </div>
                         </div>
                         <div class="content-img">
@@ -129,7 +128,7 @@
                                     <p class="time-posted">{{ comment.created_ago }}</p>
                                 </div>
                                 <div class="content-text">
-                                    <p v-if="comment.CommentText" v-html="formatMentionText(comment.CommentText)" @click.stop="handleMentionClick"></p>
+                                    <p v-if="comment.CommentText" v-html="(comment.CommentText)"></p>
                                 </div>
                             </div>
                         </div>
@@ -159,11 +158,8 @@
                 </div>
 
                 <div class="bottom">
-                    <div class="buttons">
-                        <!-- <button class="tweet-btn"><ion-icon name="happy-outline" class="create-tweet-icon"></ion-icon></button>
-                        <button class="tweet-btn" @click.stop="TogglePopup('MentionTrigger')"><ion-icon name="at-sharp" class="create-tweet-icon"></ion-icon></button> -->
-                    </div>
-                    <button class="popup-button" @click="createComment(tweetIdInPopup, comment_text_input)" :disabled="buttonDisabled || !comment_text_input">Comment</button><!-- Izdomā kā comment poga nodos tweetID. -->
+                    <div class="buttons"></div>
+                    <button class="popup-button" @click="createComment(tweetIdInPopup, comment_text_input)" :disabled="buttonDisabled || !comment_text_input">Comment</button>
                 </div>
             </div>
         </Popup>
@@ -268,43 +264,6 @@
                 </div>
             </div>
         </Popup>
-        <!-- <Popup v-if="popupTriggers.MentionTrigger" :TogglePopup="() => TogglePopup('MentionTrigger')">
-            <div class="mention-popup">
-                <p class="title">Mention</p>
-                <div class="search-input-container">
-                    <input 
-                        type="text"
-                        id="mention-input"
-                        class="search-input" 
-                        maxlength="30" 
-                        placeholder="Search"
-                        :class="{ 'focused': isInputFocused }"
-                        @input="handleMentionInput"
-                        @focus="inputFocus"
-                        @blur="inputBlur"
-                        v-model="mentionSearch"
-                    >
-                    <ion-icon name="search-outline" class="search-icon"></ion-icon>
-                    <button class="close-icon-btn" :class="{ 'focused': isInputFocused }">
-                        <ion-icon name="close-circle-sharp" class="close-icon"></ion-icon>
-                    </button>
-                </div>
-                <div class="user-suggestions">
-                    <div class="user" v-for="user in filteredUsers" :key="user.UserID" @click="insertMention(user)">
-                        <div class="user-img">
-                            <img @click="openProfile(user.UserTag)" :src="'/storage/' + user.ProfilePicture">
-                        </div>
-                        <div class="user-info">
-                            <p class="username">{{ user.Name }}</p>
-                            <p class="usertag">{{ user.UserTag }}</p>
-                        </div>
-                    </div>
-                    <div class="no-users" v-if="filteredUsers.length === 0">
-                        <p>No users found 🌵</p>   
-                    </div>
-                </div>
-            </div>
-        </Popup> -->
     </div>
 </template>
 
@@ -328,12 +287,10 @@
 
         data(){
             return {
-                users: [],
                 isHovered: [],
                 deleteTweetID: null,
                 deleteCommentTweetID: null,
                 deleteCommentID: null,
-                isInputFocused: false,
                 comments: [],
                 loading: false,
                 scrollPositions: {
@@ -399,8 +356,6 @@
             const NewName = ref('');
             const NewDescription = ref('');
             const commentInput = ref(null);
-            const mentionSearch = ref('');
-            const filteredUsers = ref([]);
             const popupTriggers = ref({
                 CommentTrigger: false,
                 EditTrigger: false,
@@ -408,7 +363,6 @@
                 PFPTrigger: false,
                 DeleteTrigger: false,
                 DeleteTrigger2: false,
-                MentionTrigger: false,
             });
 
             const router = useRouter();
@@ -429,10 +383,6 @@
                     NewDescription.value= profileuser.value.Description;
                 }
                 popupTriggers.value[trigger] = !popupTriggers.value[trigger];
-                if (trigger === 'MentionTrigger') {
-                    mentionSearch.value = '';
-                    filteredUsers.value = [];
-                }
                 if (trigger === 'CommentTrigger') {
                     comment_text_input.value='';
                 }
@@ -453,8 +403,6 @@
                 TogglePopup,
                 logoutUser,
                 commentInput,
-                mentionSearch,
-                filteredUsers,
             };
         },
 
@@ -488,7 +436,6 @@
 
                     const updatedStatsMap = response.data;
 
-                    // Update counts for each tweet based on the response
                     tweets.forEach(tweet => {
                         const updatedStats = updatedStatsMap[tweet.TweetID];
                         if (updatedStats) {
@@ -527,10 +474,8 @@
                 const visibleHeight = window.innerHeight;
                 const pageHeight = document.documentElement.scrollHeight;
 
-                // Save the scroll position for the current post type
                 this.scrollPositions[this.postType] = scrollY;
 
-                // Check if the user has scrolled to the bottom and there are more pages to load
                 if (scrollY + visibleHeight >= pageHeight - 200) {
                     console.log('User has scrolled to the bottom of the page');
                     this.loading = true;
@@ -594,77 +539,6 @@
                     console.error('Error loading more tweets:', error);
                 } finally {
                     this.loading = false;
-                }
-            },
-
-            inputFocus() {
-                this.isInputFocused = true;
-            },
-
-            inputBlur() {
-                this.isInputFocused = false;
-            },
-
-            formatMentionText(tweetText) {
-                const mentionRegex = /@([a-zA-Z0-9_]+)/g;
-                const parts = tweetText.split(mentionRegex);
-                return parts.map((part, index) => {
-                    if (index % 2 === 1) {
-                        const userTag = part;
-                        const mentionedUser = this.users.find(user2 => {
-                            return user2.UserTag === `@${userTag}`;
-                        });
-                        if (mentionedUser) {
-                            return `<span class="mention-span" data-usertag="${mentionedUser.UserTag}">@${part}</span>`;
-                        } else {
-                            return part;
-                        }
-                    } else {
-                        return part;
-                    }
-                }).join('');
-            },
-
-            handleMentionClick(event) {
-                const target = event.target;
-                if (target.classList.contains('mention-span')) {
-                    const userTag = target.getAttribute('data-usertag');
-                    this.openProfile(userTag);
-                } else {
-                }
-            },
-
-            insertMention(user) {
-                const cursorPosition = this.commentInput.value.selectionStart;
-
-                const textarea = this.commentInput;
-
-                if (!textarea) {
-                    console.error("Textarea not found");
-                    return;
-                }
-
-                const mentionTag = `${user.UserTag}`;
-                const cursorPos = textarea.selectionStart;
-                const textBeforeCursor = textarea.value.substring(0, cursorPos);
-                const textAfterCursor = textarea.value.substring(cursorPos);
-
-                this.comment_text_input = textBeforeCursor + mentionTag + textAfterCursor;
-
-                this.TogglePopup('MentionTrigger');
-
-                textarea.setSelectionRange(cursorPosition + mentionTag.length, cursorPosition + mentionTag.length);
-            },
-
-            handleMentionInput() {
-                if (this.mentionSearch.length > 0) {
-                    this.filteredUsers = this.users.filter(user => {
-                        const searchInputLower = this.mentionSearch.toLowerCase();
-                        const userTagLower = user.UserTag.toLowerCase();
-                        return userTagLower.includes(searchInputLower);
-                    });
-                } else {
-                    this.filteredUsers = [];
                 }
             },
 
@@ -974,9 +848,6 @@
                         if (tweet) {
                             tweet.isLiked = true;
                             tweet.like_count += 1;
-    /*                         if ( store.state.user.UserID === this.profileuser.UserID) {
-                                this.liked_tweets.unshift(tweet);
-                            } */
                         }
                     }
                 } catch (error) {
@@ -993,13 +864,6 @@
                         if (tweet) {
                             tweet.isLiked = false;
                             tweet.like_count -= 1;
-                            /* Uncomment if you want to remove the tweet from liked_tweets */
-    /*                         if ( store.state.user.UserID === this.profileuser.UserID) {
-                                const index = this.liked_tweets.findIndex((t) => t.TweetID === tweetId);
-                                if (index !== -1) {
-                                    this.liked_tweets.splice(index, 1);
-                                }
-                            } */
                         }
                     }
                 } catch (error) {
@@ -1045,9 +909,6 @@
                         if (tweet) {
                             tweet.isRetweeted = true;
                             tweet.retweet_count += 1;
-    /*                         if ( store.state.user.UserID === this.profileuser.UserID) {
-                                this.tweets.unshift(tweet);
-                            } */
                         }
                     }
                 } catch (error) {
@@ -1066,12 +927,6 @@
                         if (tweet) {
                             tweet.isRetweeted = false;
                             tweet.retweet_count -= 1;
-    /*                         if ( store.state.user.UserID === this.profileuser.UserID) {
-                                const index = this.tweets.findIndex((t) => t.TweetID === tweetId);
-                                if (index !== -1) {
-                                    this.tweets.splice(index, 1);
-                                }
-                            } */
                         }
                     }
                 } catch (error) {
@@ -1110,7 +965,6 @@
                         const tweet = this.currentPosts.find((t) => t.TweetID === tweetID);
                         if (tweet) {
                             tweet.isBookmarked = true;
-                            // tweet.like_count += 1;
                         }
                     }
                 } catch (error) {
@@ -1126,7 +980,6 @@
                         const tweet = this.currentPosts.find((t) => t.TweetID === tweetId);
                         if (tweet) {
                             tweet.isBookmarked = false;
-                            // tweet.like_count -= 1;
                         }
                     }
                 } catch (error) {
@@ -1135,7 +988,7 @@
             },
 
             getSpecificUserTweets(userTag) {
-                this.$axios.get(`/api/user-tweets/${userTag}`) // Adjust the URL based on your Laravel routes
+                this.$axios.get(`/api/user-tweets/${userTag}`)
                 .then((response) => {
                     this.tweets = response.data.tweets;
                     this.tweet_count = response.data.tweet_count;
@@ -1156,7 +1009,7 @@
             },
 
             getLikedTweets(userTag) {
-                this.$axios.get(`/api/liked-tweets/${userTag}`) // Adjust the URL based on your Laravel routes
+                this.$axios.get(`/api/liked-tweets/${userTag}`)
                 .then((response) => {
                     this.liked_tweets = response.data.tweets;
                     this.like_count = response.data.tweet_count;
@@ -1167,23 +1020,12 @@
             },
 
             getCommentedTweets(userTag) {
-                this.$axios.get(`/api/commented-tweets/${userTag}`) // Adjust the URL based on your Laravel routes
+                this.$axios.get(`/api/commented-tweets/${userTag}`)
                 .then((response) => {
                     this.replies = response.data.tweets;
                     this.reply_count = response.data.tweet_count;
                 })
                 .catch((error) => {
-                    console.error(error);
-                });
-            },
-
-            getAllUsersMention() {
-            axios
-                .get('/api/all-users-mention')
-                .then(response => {
-                    this.users = response.data;
-                })
-                .catch(error => {
                     console.error(error);
                 });
             },
@@ -1201,7 +1043,6 @@
             this.loadTweets('tweets')
             this.loadTweets('likes')
             this.loadTweets('replies')
-            this.getAllUsersMention();
             window.addEventListener('scroll', this.handleScroll);
             this.NewTweetInterval = setInterval(() => {
                 this.updateCounts(this.currentPosts);
@@ -1658,7 +1499,6 @@
             .textarea-wrap{
                 border: none;
                 border-radius:6px;
-                font-family: Arial, sans-serif;
                 position:relative;
                 width:auto;
                 min-height: 60px;
@@ -1690,7 +1530,7 @@
                     }
                     &::-webkit-scrollbar-thumb{
                         background-color: #2F3336;
-                        border-radius: 5px;;
+                        border-radius: 5px;
                         border:none;
                     }
                     &::-webkit-scrollbar-track{

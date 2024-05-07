@@ -1,6 +1,5 @@
 <template>
     <div class="content-container">
-        <!-- <div class="black-line"></div> -->
         <div class="top-bar">
             <div class="title">Home</div>
             <div class="title2" v-if="user">

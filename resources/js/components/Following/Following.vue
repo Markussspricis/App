@@ -25,7 +25,6 @@
 
 <style lang="scss" scoped>
     .following{
-        font-family: Arial, sans-serif;
         margin: 0 auto;
         display:flex;
         flex-direction: row;

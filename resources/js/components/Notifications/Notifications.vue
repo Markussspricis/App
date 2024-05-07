@@ -27,7 +27,6 @@
 
 <style lang="scss" scoped>
     .notifications{
-        font-family: Arial, sans-serif;
         margin: 0 auto;
         display:flex;
         flex-direction: row;

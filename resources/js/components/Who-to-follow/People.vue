@@ -22,7 +22,6 @@
 
 <style lang="scss" scoped>
     .people{
-        font-family: Arial, sans-serif;
         margin: 0 auto;
         display:flex;
         flex-direction: row;

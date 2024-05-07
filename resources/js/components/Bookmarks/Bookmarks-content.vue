@@ -1,6 +1,5 @@
 <template>
     <div class="content-container">
-        <!-- <div class="black-line"></div> -->
         <div class="top-top">
             <button class="back-icon" @click="goBack">
                 <ion-icon name="arrow-back-outline"></ion-icon>

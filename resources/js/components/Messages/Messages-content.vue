@@ -414,7 +414,7 @@
                         }
                         &::-webkit-scrollbar-thumb{
                             background-color: #2F3336;
-                            border-radius: 5px;;
+                            border-radius: 5px;
                             border:none;
                         }
                         &::-webkit-scrollbar-track{
@@ -525,7 +525,7 @@
                     }
                     &::-webkit-scrollbar-thumb{
                         background-color: #2F3336;
-                        border-radius: 5px;;
+                        border-radius: 5px;
                         border:none;
                     }
                     &::-webkit-scrollbar-track{
