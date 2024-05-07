@@ -11,9 +11,7 @@ class Notification extends Model
 
     protected $table = 'notifications';
 
-    protected $fillable = [
-        'SenderID', 'ReceiverID', 'NotificationType', 'NotificationText', 'NotificationLink', 'Read'
-    ];
+    protected $fillable = ['SenderID', 'ReceiverID', 'NotificationType', 'NotificationText', 'NotificationLink', 'Read'];
 
     public function sender()
     {

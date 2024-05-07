@@ -39,7 +39,7 @@ class MessageController extends Controller
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $path = $image->store('tweet_pictures', 'public');
+            $path = $image->store('message_pictures', 'public');
             $message->Image = $path;
         }
 
