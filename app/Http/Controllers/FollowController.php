@@ -79,7 +79,7 @@ class FollowController extends Controller
             }
             Log::info($followed);
             Log::info($nonfollowed);
-            $sortedUsers = $nonfollowed->concat($followed)->take(3);
+            $sortedUsers = $nonfollowed->concat($followed)->take(8);
     
             return response()->json($sortedUsers);
         } else {
