@@ -47,7 +47,7 @@
                         <button class="delete-btn" @click.stop="setConversationToDelete(conversation)">
                             <ion-icon name="trash-bin-outline" class="delete-icon"></ion-icon>
                         </button>
-                        <div v-if="conversation.unreadCount > 0">
+                        <div class="count" v-if="conversation.unreadCount > 0">
                             <div class="message-count" @click.stop="markConversationAsRead(conversation)">{{ conversation.unreadCount }}</div>
                         </div>
                     </div>
@@ -541,7 +541,6 @@
                         display:flex;
                         flex-direction:row;
                         align-items: center;
-                        justify-content: space-between;
                         box-sizing: border-box;
                         padding: 40px 20px;
                         cursor:pointer;
@@ -588,6 +587,8 @@
                             justify-content: center;
                             align-items: center;
                             padding:0;
+                            margin-left: auto;
+                            margin-right: 5px;
                             cursor:pointer;
                             .delete-icon{
                                 font-size:16px;
@@ -599,18 +600,21 @@
                                 background-color: rgba($color: #f11515, $alpha: 0.1);
                             }
                         }
-                        .message-count{
-                            background-color: #1da1f2;
-                            font-size:18px;
-                            border-radius:50px;
-                            right:5px;
-                            min-width:30px;
-                            max-width:60px;
-                            height:30px;
-                            color:white;
-                            display:flex;
-                            align-items: center;
-                            justify-content: center;
+                        .count{
+                            display: flex;
+                            .message-count{
+                                background-color: #1da1f2;
+                                font-size:18px;
+                                border-radius:50px;
+                                right:5px;
+                                min-width:30px;
+                                max-width:60px;
+                                height:30px;
+                                color:white;
+                                display:flex;
+                                align-items: center;
+                                justify-content: center;
+                            }
                         }
                     }
                 }
@@ -632,7 +636,7 @@
                     }
                     .search-people{
                         .people-container{
-                            max-height: 200px;
+                            max-height: 300px;
                         }
                     }
                 }
@@ -643,7 +647,7 @@
                         margin-top: 5%;
                     }
                     .conversations{
-                        max-height: 380px;
+                        max-height: 450px;
                     }
                 }
             }
@@ -660,7 +664,7 @@
                     }
                     .search-people{
                         .people-container{
-                            max-height: 220px;
+                            max-height: 320px;
                         }
                     }
                 }
