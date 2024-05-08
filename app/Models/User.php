@@ -13,6 +13,7 @@ class User extends Authenticatable
     use HasApiTokens;
 
     protected $table = 'users';
+    
     protected $primaryKey = 'UserID';
 
     protected $fillable = [
@@ -28,26 +29,28 @@ class User extends Authenticatable
         'password_reset_expires_at',
     ];
 
-    protected $hidden = [
-        'Password',
-    ];
+    protected $hidden = ['Password',];
 
     public function tweets()
     {
         return $this->hasMany(Tweet::class, 'UserID');
     }
+
     public function retweets()
     {
         return $this->hasMany(Retweet::class, 'UserID');
     }
+
     public function likes()
     {
         return $this->hasMany(Like::class, 'UserID');
     }
+
     public function comments()
     {
         return $this->hasMany(Comment::class, 'UserID');
     }
+
     public function bookmarks()
     {
         return $this->hasMany(Bookmark::class, 'UserID');
@@ -57,6 +60,7 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(User::class, 'follows', 'FollowerID', 'FollowingID');
     }
+
     public function followers()
     {
         return $this->belongsToMany(User::class, 'follows', 'FollowingID', 'FollowerID');

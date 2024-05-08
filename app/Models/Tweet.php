@@ -21,22 +21,27 @@ class Tweet extends Model
     {
         return $this->belongsTo(User::class, 'UserID');
     }
+
     public function comments()
     {
         return $this->hasMany(Comment::class, 'TweetID');
     }
+
     public function retweets()
     {
         return $this->hasMany(Retweet::class, 'TweetID');
     }
+
     public function likes()
     {
         return $this->hasMany(Like::class, 'TweetID');
     }
+
     public function bookmarks()
     {
         return $this->hasMany(Bookmark::class, 'TweetID');
     }
+    
     protected static function boot()
     {
         parent::boot();
